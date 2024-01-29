@@ -17,7 +17,11 @@ Generate the most optimized & smallest `Dockerfile` for your shell scripts!
 
 ## When not to use `shedock`, or when not to write a `Dockerfile` for your script?
 
-- If you are depending on the host machine's resources, like `notify-send`, `xdg-open`, anything UI.
+- If you are depending on the host machine's resources, like `notify-send`, `xdg-open`, or anything UI.
+
+## Its `2024`, why are we still writing shell scripts?
+
+- They work, deal with it.
 
 To run on a Mac, you need to set the following environment variables:
 
