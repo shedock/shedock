@@ -47,9 +47,13 @@
   - https://stackoverflow.com/questions/37818831/is-there-a-best-practice-on-setting-up-glibc-on-docker-alpine-linux-base-image
 - Understand the difference b/w `glibc` and `musl`
   - https://stackoverflow.com/a/66974607
+- `notify-send` wont work on containers
+  - https://github.com/mikaelbr/node-notifier/issues/200
 
 ## Projects to use for testing
 
 - https://github.com/KevCui/animepahe-dl
 - https://github.com/jarun/ddgr
+- https://github.com/HarshitJoshi9152/libgen
+- https://github.com/kamranahmedse/git-standup
 - Find more on https://github.com/search?q=language%3AShell+&type=repositories
