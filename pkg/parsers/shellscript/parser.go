@@ -49,6 +49,21 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 								Name: lit.Value,
 							}
 						}
+
+						// collect arguments
+						args := []string{}
+						for _, arg := range n.Args[1:] {
+							for _, argPart := range arg.Parts {
+								if argLit, ok := argPart.(*syntax.Lit); ok {
+									args = append(args, argLit.Value)
+								}
+							}
+						}
+						// add arguments to the dependency
+						uniqDeps[lit.Value] = Dependency{
+							Name: lit.Value,
+							Args: args,
+						}
 					}
 				}
 			}
