@@ -5,7 +5,7 @@
 1. ~~Find all the commands in the shell script.~~
 2. ~~Find the base shell type (bash, zsh, sh, etc.)~~.
 3. ~~Find builtins for the base shell type~~.
-4. Filter out the builtins from the commands.
+4. ~~Filter out the shell builtins from the commands~~.
    1. These builtins will be installed with the base shell type.
    2. The remaining commands will be searched, and or installed with the Alpine package manager.
 5. Start an alpine container

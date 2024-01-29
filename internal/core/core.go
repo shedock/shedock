@@ -6,6 +6,7 @@ import (
 	apkTypes "shedock/pkg/parsers/apk"
 	shellScriptTypes "shedock/pkg/parsers/shellscript"
 	"shedock/pkg/shell"
+	"strings"
 )
 
 type ImageBuilder struct {
@@ -25,6 +26,11 @@ func NewImageBuilder(
 
 func (i *ImageBuilder) Build() error {
 	var filteredDeps []string
+
+	systemBuiltins, err := i.getSystemBuiltins()
+	if err != nil {
+		return err
+	}
 
 	shellType, err := i.Script.GetShell()
 	if err != nil {
@@ -47,25 +53,56 @@ func (i *ImageBuilder) Build() error {
 
 	for _, dep := range scriptDeps {
 		var found bool
+
+		// Check if the dependency is a shell builtin
 		for _, builtin := range shellbuiltns {
 			if dep.Name == builtin {
 				found = true
 				break
 			}
 		}
+
+		// Check if the dependency is a system builtin
+		for _, builtin := range systemBuiltins {
+			if strings.Contains(builtin, dep.Name) {
+				found = true
+				break
+			}
+		}
+
 		if !found {
 			filteredDeps = append(filteredDeps, dep.Name)
 		}
 	}
+
+	log.Println(filteredDeps)
 	return nil
 }
 
-func (i *ImageBuilder) getSysteDependencies() ([]string, error) {
-	return []string{}, nil
+// System dependencies are the binaries that are installed in the base image
+// E.g. ls, cat, etc.
+func (i *ImageBuilder) getSystemBuiltins() ([]string, error) {
+	container := instance.GetDockerInstance()
+	output, err := container.ExecCommand("for binary in /bin/* /usr/bin/*; do echo \"$binary\"; done")
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+	var builtins []string
+	builtins = append(builtins, strings.Split(output, "\n")...)
+	// Parse the output
+
+	return builtins, nil
 }
 
+// Shell builtins are the binaries that are installed by the shell
+// E.g. [[, readarray, zmodload, etc.
 func (i *ImageBuilder) getShellBuiltins() ([]string, error) {
 	container := instance.GetDockerInstance()
+	_, err := container.ExecCommand(i.Shell.InstallShellCommand())
+	if err != nil {
+		log.Fatalf("%v", err)
+	}
+
 	output, err := container.ExecCommand(i.Shell.CommandToFindBuiltinCommands())
 	if err != nil {
 		log.Fatalf("%v", err)
@@ -78,6 +115,8 @@ func (i *ImageBuilder) getShellBuiltins() ([]string, error) {
 	return builtins, nil
 }
 
+// Shell libraries are the libraries that are required by the shell. Also called as "shared libraries"
+// E.g. libreadline, libncurses, etc.
 func (i *ImageBuilder) getShellLibraries() ([]*apkTypes.PackageDependency, error) {
 	container := instance.GetDockerInstance()
 	// Execute command in the container and get the output
