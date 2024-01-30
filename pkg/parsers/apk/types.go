@@ -6,7 +6,9 @@ type PackageDependency struct {
 }
 
 type ProviderDependency struct {
-	Name    string
+	// Name of the command that the dependency provides
+	Name string
+	// Version of the command that the dependency provides
 	Version string
 }
 

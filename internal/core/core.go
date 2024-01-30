@@ -1,6 +1,7 @@
 package core
 
 import (
+	"fmt"
 	"log"
 	"shedock/internal/instance"
 	apkTypes "shedock/pkg/parsers/apk"
@@ -76,6 +77,11 @@ func (i *ImageBuilder) Build() error {
 	}
 
 	log.Println(filteredDeps)
+	cmdOnApk, err := i.filterDependenciesFromPackageHost(filteredDeps)
+	if err != nil {
+		return err
+	}
+	log.Println(cmdOnApk)
 	return nil
 }
 
@@ -154,4 +160,32 @@ func (i *ImageBuilder) getShellBinaryBuiltins() ([]string, error) {
 	}
 
 	return binDeps, nil
+}
+
+// Find dependencies that can be installed by the package manager (for now apk)
+func (i *ImageBuilder) filterDependenciesFromPackageHost(deps []string) ([]string, error) {
+	container := instance.GetDockerInstance()
+	var depsOnApk []string
+	var err error
+
+	for _, dep := range deps {
+		// Execute the info command again to get the stuff installed by the shell
+		output, err := container.ExecCommand(fmt.Sprintf("apk info -a %s", dep))
+		if err != nil {
+			return []string{}, err
+		}
+
+		// Parse the output
+		parser := apkTypes.ApkParser{Data: []byte(output)}
+		dependencies, err := parser.Provides()
+		if err != nil {
+			return []string{}, err
+		}
+
+		for _, dependency := range dependencies {
+			depsOnApk = append(depsOnApk, dependency.Name)
+		}
+	}
+
+	return depsOnApk, err
 }
