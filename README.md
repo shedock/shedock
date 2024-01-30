@@ -65,8 +65,28 @@ export DOCKER_API_VERSION=1.43
 
 List & status of shells supported by shedock:
 
-// TODO
 
+| Shell      | Comptability Status | Notes |
+| ---------- | ------------------- | ----- |
+| bash       | ✅                   |       |
+| zsh        | ⚪️                   |       |
+| sh         | ⚪️                   |       |
+| fish       | ⚪️                   |       |
+| oil        | ⚪️                   |       |
+| csh        | ⚪️                   |       |
+| tcsh       | ⚪️                   |       |
+| ksh        | ⚪️                   |       |
+| dash       | ⚪️                   |       |
+| mksh       | ⚪️                   |       |
+| oksh       | ⚪️                   |       |
+| osh        | ⚪️                   |       |
+| elv        | ⚪️                   |       |
+| powershell | ⚪️                   |       |
+
+
+- ✅ means that the shell is supported by shedock.
+- ⚪️ means that it's a WIP.
+- ❌ means that the shell is not supported by shedock.
 
 ## FAQs
 
