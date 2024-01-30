@@ -49,6 +49,9 @@
   - https://stackoverflow.com/a/66974607
 - `notify-send` wont work on containers
   - https://github.com/mikaelbr/node-notifier/issues/200
+- Automatically detect color codes in the shell script and add `TERM=xterm-256color` to the Dockerfile.
+  - https://stackoverflow.com/a/20983251
+  - https://chadaustin.me/2024/01/truecolor-terminal-emacs/
 
 ## Projects to use for testing
 

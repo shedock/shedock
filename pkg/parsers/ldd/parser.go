@@ -1,18 +1,19 @@
-package parsers
+package ldd
 
 import "strings"
 
-type Library struct {
-	Name      string
-	IsSymlink bool
+type LddParser struct {
+	// Data is the raw data returned by ldd <binary>
+	Data []byte
 }
 
-type Dependencies struct {
-	Binary       string
-	Dependencies []Library
-}
-
-func ParseLddOutput(output string) []Dependencies {
+// Parse parses the output of ldd <binary>
+// E.g.:
+// / # ldd $(which sh)
+//
+//	/lib/ld-musl-aarch64.so.1 (0xffffa1ed5000)
+//	libc.musl-aarch64.so.1 => /lib/ld-musl-aarch64.so.1 (0xffffa1ed5000)
+func (l *LddParser) Parse(output string) []Dependencies {
 	lines := strings.Split(output, "\n")
 	parsers := []Dependencies{}
 
