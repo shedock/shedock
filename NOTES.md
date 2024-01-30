@@ -57,3 +57,10 @@
 - https://github.com/HarshitJoshi9152/libgen
 - https://github.com/kamranahmedse/git-standup
 - Find more on https://github.com/search?q=language%3AShell+&type=repositories
+
+
+## Blog Ideas
+
+- The need for dockerizing your shell scripts
+- The awesomeness of Alpine images
+- Static v/s Dynamic Libraries, Linking etc.

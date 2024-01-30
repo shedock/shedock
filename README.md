@@ -1,6 +1,6 @@
 # shedock
 
-Generate the most ethically optimized & smallest `Dockerfile` for your shell scripts!
+Generate the most ethically optimized & smallest `Dockerfile` 🐳 for your shell scripts!
 
 > [!IMPORTANT]
 > shedock is under active development and is changing everyday. Please consider `Watching` the repository for _releases_.
@@ -43,9 +43,8 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 
 ## Inspiration
 
-I got inspired by [my own article]() which I wrote while writing a Dockerfile for [ugit (a shellscript based tool)](). I learned cool new stuff which I realized can be materialized into this tool.
+I got inspired by [my own article]() which I wrote while writing a Dockerfile for [ugit (a shellscript based tool)](https://github.com/Bhupesh-V/ugit). I learned cool new stuff which then I realized can be materialized into this tool.
 
-To run on Mac, you need to set the following environment variables:
 
 ## Building
 
@@ -55,19 +54,23 @@ To run on Mac, you need to set the following environment variables:
 2. Go (>=1.21.3)
 3. The Internet
 
+To run on Mac, you need to set the following environment variables:
+
 ```bash
 export DOCKER_HOST="unix:///Users/$USER/.docker/run/docker.sock"
 export DOCKER_API_VERSION=1.43
 ```
 
-## Dependency Chat
+## Dependency Chart
+
+List & status of shells supported by shedock:
 
 // TODO
 
 
 ## FAQs
 
-### Its `2024`, why are we still writing shell scripts?
+### Its `202N`, why are we still writing shell scripts?
 
 - `They are fun to write` + `They work`, deal with it.
 
@@ -76,11 +79,12 @@ export DOCKER_API_VERSION=1.43
 - They are great, they have a big community behind them actively building and fixing stuff. Give them a try before using shedock.
 - shedock is not built having competition in mind, but rather, "education" we want devs to know what exactly is required to run their script. Not hiding stuff behind some weird magic.
 
-### Why not built this for all tech stacks, why only shell-scripts?
+### Why not build this for all tech stacks, why only shell-scripts?
 
 - A: because when you are building for everyone, you are building for no-one.
-- B: shedock's author is biased towards writing and sharing shell scripts.
+- B: the author is biased towards writing and sharing shell scripts.
+- C: the author doesn't have the mental energy to build & test it across a 1000 stacks.
 
 ### I don't think you are building this right
 
-- Great, we have something in common 🙃. I am figuring stuff on the go. If you think something can be improved, [start a new discussion]() and leave me some helpful tips.
+- Great, we have something in common 🙃. I am figuring stuff on the go. If you think something can be improved, [start a new discussion](https://github.com/shedock/shedock/discussions) and leave me some helpful tips.
