@@ -28,7 +28,7 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 
 ### Easy to use
 
-- Shedock doesn't have any unnecessary flags, just install & run `shedock /path/to/script.sh` and it will generate the Dockerfile for you.
+- Shedock doesn't have any unnecessary flags, just install & run `shedock /path/to/script.sh` and it will work.
 
 ## Who is `shedock` built for?
 
@@ -59,6 +59,11 @@ To run on Mac, you need to set the following environment variables:
 export DOCKER_HOST="unix:///Users/$USER/.docker/run/docker.sock"
 export DOCKER_API_VERSION=1.43
 ```
+
+## Dependency Chat
+
+// TODO
+
 
 ## FAQs
 
