@@ -12,19 +12,19 @@ Generate the most ethically optimized & smallest `Dockerfile` for your shell scr
 
 Shedock will generate the most ethically minimal `Dockerfile` for your shell script. This means.
 
-- Automatically detecting and adding your script & shell dependencies to the final Docker image. Yes this includes external commands like `curl`, `wget`, `git`, etc.
+- Automatically detecting and adding your script & shell dependencies to the final Docker image.
 - Add only the stuff _absolutely_ required to run your script.
 - This ultimately results in a smaller image size.
 
 ### You own it
 
 - Shedock will generate a heavily documented Dockerfile, so that you can understand what's going on.
-- This way shedock encourages users to learn and maintain the `Dockerfile` on their own (for now, we are planning to cover this bridge as well).
+- This way shedock encourages users to learn and maintain the `Dockerfile` on their own (we are planning to cover this bridge as well).
 
 ### Insights
 
 - We would be lying to ourselves if we say all edge cases our covered. shedock WILL fail on some weird cases.
-- But we try to figure out what those cases are and generate tips for you. So that you can take the best decision. Hell you own the script!
+- But we try to figure out what those scenarios are and generate tips for you. So that you can take the best decision until shedock becomes capable to fix it.
 
 ### Easy to use
 
