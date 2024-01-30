@@ -61,6 +61,8 @@
 
 ## Blog Ideas
 
-- The need for dockerizing your shell scripts
-- The awesomeness of Alpine images
+- The need for dockerizing your shell scripts.
+- The awesomeness of Alpine images.
 - Static v/s Dynamic Libraries, Linking etc.
+- Cool things you can do via shell scripts.
+- Best practices for shell scripts.

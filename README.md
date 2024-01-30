@@ -13,7 +13,7 @@ Generate the most ethically optimized & smallest `Dockerfile` 🐳 for your shel
 Shedock will generate the most ethically minimal `Dockerfile` for your shell script. This means.
 
 - Automatically detecting and adding your script & shell dependencies to the final Docker image.
-- Add only the stuff _absolutely_ required to run your script.
+- Add only the stuff _absolutely_ required to run your script and get rid of unnecessary things.
 - This ultimately results in a smaller image size.
 
 ### You own it
@@ -61,27 +61,27 @@ export DOCKER_HOST="unix:///Users/$USER/.docker/run/docker.sock"
 export DOCKER_API_VERSION=1.43
 ```
 
-## Dependency Chart
+## Shell Comptability Chart
 
 List & status of shells supported by shedock:
 
 
-| Shell      | Comptability Status | Notes |
-| ---------- | ------------------- | ----- |
-| bash       | ✅                   |       |
-| zsh        | ⚪️                   |       |
-| sh         | ⚪️                   |       |
-| fish       | ⚪️                   |       |
-| oil        | ⚪️                   |       |
-| csh        | ⚪️                   |       |
-| tcsh       | ⚪️                   |       |
-| ksh        | ⚪️                   |       |
-| dash       | ⚪️                   |       |
-| mksh       | ⚪️                   |       |
-| oksh       | ⚪️                   |       |
-| osh        | ⚪️                   |       |
-| elv        | ⚪️                   |       |
-| powershell | ⚪️                   |       |
+|   Shell    | Comptability Status | Notes |
+| :--------: | :-----------------: | ----- |
+|    bash    |          ✅          |       |
+|    zsh     |          ⚪️          |       |
+|     sh     |          ⚪️          |       |
+|    fish    |          ⚪️          |       |
+|    oil     |          ⚪️          |       |
+|    csh     |          ⚪️          |       |
+|    tcsh    |          ⚪️          |       |
+|    ksh     |          ⚪️          |       |
+|    dash    |          ⚪️          |       |
+|    mksh    |          ⚪️          |       |
+|    oksh    |          ⚪️          |       |
+|    osh     |          ⚪️          |       |
+|    elv     |          ⚪️          |       |
+| powershell |          ⚪️          |       |
 
 
 - ✅ means that the shell is supported by shedock.
