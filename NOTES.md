@@ -69,3 +69,57 @@
 - Static v/s Dynamic Libraries, Linking etc.
 - Cool things you can do via shell scripts.
 - Best practices for shell scripts.
+
+## Reads
+
+- Union File Systems
+  - https://martinheinz.dev/blog/44
+  - https://docs.docker.com/storage/storagedriver/overlayfs-driver/
+  - https://docs.docker.com/storage/storagedriver/aufs-driver/
+  - https://leftasexercise.com/2018/04/12/docker-internals-process-isolation-with-namespaces-and-cgroups/
+- Busybox
+  - https://www.busybox.net/
+
+## CLI Interface
+
+```
+✅ Analyzing shell script
+   - Shell recognized: bash
+   - Found 10 dependencies
+✅ Getting transistive dependencies
+   - Found 5 transistive dependencies
+✅ Generating Dockerfile
+   - Dockerfile generated at <path>
+✅ Building image
+   - Image built successfully!
+   - Run the following command to start a container for your image:
+     $ docker run -it --rm <image>:latest
+
+👀 Insights:
+- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:
+  - xdg-open
+  - notify-send
+- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:
+  - ripgrep
+  - dog
+
+Report any issues at <link>
+```
+
+## Checklist for use-cases while Dockerizing a shell script
+
+- [ ] File operations
+  - [ ] Read files and directories
+  - [ ] Write files and directories
+  - [ ] Watching files and directories
+- [ ] Network operations
+  - [ ] HTTP requests
+  - [ ] DNS lookups
+- [ ] Displaying TUI
+- [ ] Scheduling work (cron jobs)
+- [ ] Interacting with the system (userspace)
+  - [ ] Running commands
+  - [ ] Running commands in the background
+  - [ ] Running commands in parallel
+  - [ ] Setting environment variables
+  - [ ] Reading environment variables
