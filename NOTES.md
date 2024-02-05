@@ -36,6 +36,7 @@
 - https://pkgs.alpinelinux.org/package/edge/main/armhf/dash
 - https://github.com/ibara/oksh
 - https://pkgs.alpinelinux.org/package/v3.18/community/x86_64/powershell
+- https://github.com/nushell/nushell
 - https://elv.sh/ (not on alpine main repo, only on edge)
 
 ## Gotchas to tackle in the future
@@ -47,6 +48,7 @@
   - https://stackoverflow.com/questions/37818831/is-there-a-best-practice-on-setting-up-glibc-on-docker-alpine-linux-base-image
 - Understand the difference b/w `glibc` and `musl`
   - https://stackoverflow.com/a/66974607
+  - https://wiki.musl-libc.org/
 - `notify-send` wont work on containers
   - https://github.com/mikaelbr/node-notifier/issues/200
 - Automatically detect color codes in the shell script and add `TERM=xterm-256color` to the Dockerfile.
@@ -67,7 +69,6 @@
 - The need for dockerizing your shell scripts.
 - The awesomeness of Alpine images.
 - Static v/s Dynamic Libraries, Linking etc.
-- Cool things you can do via shell scripts.
 - Best practices for shell scripts.
 
 ## Reads
@@ -123,3 +124,26 @@ Report any issues at <link>
   - [ ] Running commands in parallel
   - [ ] Setting environment variables
   - [ ] Reading environment variables
+
+
+## Insights to provide
+
+- Inconsistent usage of `echo` & `printf`.
+- Unnecessary usage of HERE documents. Use multi-line `printf` instead.
+- Incompatible usage of commands:
+  - xdg-open, open, notify-send, etc.
+- Unncessary usage of basename:
+  - `$(basename "${BASH_SOURCE[0]}")` -> `<script_name>`
+  - Reduce size by hardcoding the script name.
+
+## Package Maintainers
+
+- https://debian-handbook.info/browse/stable/sect.becoming-package-maintainer.html
+- https://www.reddit.com/r/linux/comments/kmat5j/what_exactly_is_expected_of_a_package_maintainer/
+- https://wiki.archlinux.org/title/Package_Maintainers
+- https://unixsheikh.com/articles/the-heavy-responsibility-of-the-package-maintainer.html
+- https://github.com/jubalh/awesome-package-maintainer
+
+## Container Tooling
+
+- https://buildah.io/
