@@ -26,9 +26,6 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 - We would be lying to ourselves if we say all edge cases our covered. shedock WILL fail on some weird cases.
 - But we try to figure out what those scenarios are and generate tips for you. So that you can take the best decision until shedock becomes capable to fix it.
 
-### Easy to use
-
-- Shedock doesn't have any unnecessary flags, just install & run `shedock /path/to/script.sh` and it will work.
 
 ## Who is `shedock` built for?
 
@@ -90,9 +87,13 @@ List & status of shells supported by shedock:
 
 ## FAQs
 
-### Its `202N`, why are we still writing shell scripts?
+### It's `202N`, why are we still writing shell scripts?
 
 - `They are fun to write` + `They work`, deal with it.
+
+### `Docker` is not a package manager, why are we using it to package shell scripts?
+
+- It's literally built to share your work across different systems. `brew` is not popular in Linux, Flatpaks, AppImages don't work on Mac, and Windows has its package manager now. How much time do you want to spend just packaging stuff compared to people actually using your work?
 
 ### What about other tools like `docker-squash` & `docker-slim`?
 
