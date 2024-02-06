@@ -51,7 +51,7 @@ func (p *ApkParser) DependsOn() ([]*PackageDependency, error) {
 	return dependencies, nil
 }
 
-// Parse
+// Provides generates the list of commands shipped with a apk package
 // fish-3.6.1-r2 provides:
 // cmd:fish=3.6.1-r2
 // cmd:fish_indent=3.6.1-r2

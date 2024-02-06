@@ -4,7 +4,6 @@ import (
 	"context"
 	"fmt"
 	"io"
-	"log"
 
 	"github.com/docker/docker/api/types"
 	"github.com/docker/docker/api/types/container"
@@ -31,7 +30,6 @@ func NewContainer() (*Container, error) {
 	}
 	defer cli.Close()
 
-	log.Println("Pulling Alpine image")
 	err = pullImage(cli, imageName)
 	if err != nil {
 		return nil, fmt.Errorf("failed to pull Alpine image: %s", err)
@@ -42,7 +40,6 @@ func NewContainer() (*Container, error) {
 		ctx:          context.Background(),
 	}
 
-	log.Println("Creating container")
 	err = container.Create()
 	if err != nil {
 		return nil, fmt.Errorf("failed to create container: %s", err)
@@ -69,7 +66,7 @@ func (c *Container) Create() error {
 	}
 
 	// update apk cache
-	log.Println("Updating apk cache")
+	// log.Println("Updating apk cache")
 	_, err = c.ExecCommand("apk update")
 	if err != nil {
 		return err

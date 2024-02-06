@@ -1,0 +1,265 @@
+package cmd
+
+import (
+	"fmt"
+	"log"
+	"os"
+	"shedock/internal/core"
+	"shedock/internal/instance"
+	"shedock/pkg/parsers/shellscript"
+	"shedock/pkg/shell"
+	"time"
+
+	"github.com/charmbracelet/bubbles/spinner"
+	tea "github.com/charmbracelet/bubbletea"
+	"github.com/charmbracelet/lipgloss"
+	"github.com/mitchellh/go-wordwrap"
+	"github.com/spf13/cobra"
+)
+
+var (
+	spinners = []spinner.Spinner{
+		// spinner.MiniDot
+		spinner.Points,
+		{
+			Frames: []string{"🧡", "💛", "💚", "💙", "💜", "🖤", "🤍"},
+			FPS:    time.Second / 19,
+		},
+	}
+
+	textStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("15")).
+			Bold(true).
+			Render
+	bodyStyle = lipgloss.NewStyle().
+			Foreground(lipgloss.Color("251")).
+			Render
+	textStyleInsights = lipgloss.NewStyle().
+				Foreground(lipgloss.Color("45")).
+				Bold(true).PaddingLeft(2).
+				PaddingRight(2).
+				Border(lipgloss.RoundedBorder()).
+				Render
+	commandStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Background(lipgloss.Color("12")).Render
+	shellNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("45")).Render
+	spinnerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
+)
+
+type model struct {
+	step          int
+	spinner       spinner.Model
+	commandOutput string
+	builder       *core.ImageBuilder
+}
+type analyzeShellScriptMsg string
+type getTransitiveDependenciesMsg string
+type generateDockerfileMsg string
+type buildImageMsg string
+type insightsMsg string
+
+func (m *model) analyzeShellScriptCmd() tea.Cmd {
+	return func() tea.Msg {
+		// we pull a sneaky on ya
+		instance.Init()
+		err := m.builder.LoadSystemBuiltins()
+		if err != nil {
+			return err
+		}
+
+		shell, _ := m.builder.Script.GetShell()
+
+		scriptDeps, err := m.builder.Script.Dependencies()
+		if err != nil {
+			return err
+		}
+
+		totalDependencies := len(scriptDeps)
+
+		return analyzeShellScriptMsg(
+			bodyStyle(
+				fmt.Sprintf("\n✅ %s\n├── Shell recognized: %s\n└── Found %d dependencies\n", textStyle("Analyzing shell script"), shellNameStyle(shell), totalDependencies),
+			),
+		)
+	}
+}
+
+func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
+	return func() tea.Msg {
+		// load ls, cat etc
+		err := m.builder.LoadSystemBuiltins()
+		if err != nil {
+			return err
+		}
+		// load dependencies shipped with the shell
+		err = m.builder.LoadShellBuiltins()
+		if err != nil {
+			return err
+		}
+
+		// shellbuiltins := m.builder.GetShellBuiltins()
+		// if err != nil {
+		// 	return err
+		// }
+
+		// time.Sleep(1 * time.Second)
+		transistiveDependencies := 5
+		return getTransitiveDependenciesMsg(
+			bodyStyle(
+				fmt.Sprintf("\n✅ %s\n└── Found %d transitive dependencies\n", textStyle("Getting transistive dependencies"), transistiveDependencies),
+			),
+		)
+	}
+}
+
+func (m *model) generateDockerfileCmd() tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(1 * time.Second)
+		return generateDockerfileMsg(
+			bodyStyle(
+				fmt.Sprintf("\n✅ %s\n└── Dockerfile generated at /home/abhinav/Projects/shedock/Dockerfile\n", textStyle("Generating Dockerfile")),
+			),
+		)
+	}
+}
+
+func (m *model) buildImageCmd() tea.Cmd {
+	return func() tea.Msg {
+		time.Sleep(1 * time.Second)
+		return buildImageMsg(
+			bodyStyle(
+				fmt.Sprintf("\n✅ %s\n├── Image built successfully!\n└── Run the following command to start a container for your image:\n    > docker run -it --rm <image>:latest", textStyle("Building docker image")),
+			),
+		)
+	}
+}
+
+func (m *model) getInsightsCmd() tea.Cmd {
+	return func() tea.Msg {
+		// time.Sleep(2 * time.Second)
+		var insights string
+		// var title string
+		title := fmt.Sprintf("\n\n%s\n", textStyleInsights("We are not perfect!"))
+		insights += fmt.Sprintf("- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:\n  - xdg-open\n  - notify-send\n- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:\n  - ripgrep\n  - dog")
+		insights += fmt.Sprintf("\n\n%s\n\n", "Report any issues at link")
+
+		wrappedText := wordwrap.WrapString(insights, 80) // Wrap text after 80 characters
+		return insightsMsg(title + wrappedText)
+	}
+}
+
+func (m *model) Init() tea.Cmd {
+	return tea.Sequence(
+		m.spinner.Tick,
+		m.analyzeShellScriptCmd(),
+		m.getTransitiveDependenciesCmd(),
+		m.generateDockerfileCmd(),
+		m.buildImageCmd(),
+		m.getInsightsCmd(),
+	)
+}
+
+func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
+	switch msg := msg.(type) {
+	case tea.KeyMsg:
+		if msg.Type == tea.KeyCtrlC {
+			return m, tea.Quit
+		}
+	case spinner.TickMsg:
+		var cmd tea.Cmd
+		m.spinner, cmd = m.spinner.Update(msg)
+		return m, cmd
+	case analyzeShellScriptMsg:
+		m.commandOutput += string(msg)
+		m.step++
+	case getTransitiveDependenciesMsg:
+		m.commandOutput += string(msg)
+		m.step++
+	case generateDockerfileMsg:
+		m.commandOutput += string(msg)
+		m.step++
+	case buildImageMsg:
+		m.commandOutput += string(msg)
+		m.step++
+	case insightsMsg:
+		m.commandOutput += string(msg)
+		m.step++
+	default:
+		return m, nil
+	}
+	if m.step > 4 {
+		return m, tea.Quit
+	}
+	return m, nil
+}
+
+func (m *model) initSpinner() {
+	m.spinner = spinner.New()
+	m.spinner.Style = spinnerStyle
+	m.spinner.Spinner = spinners[0]
+}
+
+func (m *model) View() string {
+	var s string
+	s += m.commandOutput
+	switch m.step {
+	case 0:
+		s += fmt.Sprintf("\n%s %s", m.spinner.View(), textStyle("Analyzing shell script"))
+	case 1:
+		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Getting transitive dependencies"))
+	case 2:
+		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Generating Dockerfile"))
+	case 3:
+		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Building image"))
+	}
+	return s
+}
+
+func main() {
+	m := &model{}
+	m.initSpinner()
+
+	if _, err := tea.NewProgram(m).Run(); err != nil {
+		fmt.Println("could not run program:", err)
+		os.Exit(1)
+	}
+}
+
+func DriverCli(cmd *cobra.Command, args []string) {
+	// check if filepath is a shell script
+	script := shellscript.Script{ScriptPath: args[0]}
+	isScript, err := script.Validate()
+	if err != nil || !isScript {
+		log.Fatalf("Failed to validate script: %v", err)
+	}
+
+	shellType, err := script.GetShell()
+	if err != nil {
+		log.Fatalf("Failed to get shell type: %v", err)
+	}
+	shell, err := shell.NewShell(shellType)
+	if err != nil {
+		log.Fatalf("Failed to get shell: %v", err)
+	}
+
+	imageBuilder := core.NewImageBuilder(
+		&script,
+		shell,
+	)
+
+	// err = imageBuilder.Build()
+	// if err != nil {
+	// 	log.Fatalf("Failed to build image: %v", err)
+	// }
+
+	m := &model{
+		builder: imageBuilder,
+	}
+	m.initSpinner()
+
+	if _, err := tea.NewProgram(m).Run(); err != nil {
+		fmt.Println("could not run program:", err)
+		os.Exit(1)
+	}
+
+	defer instance.Destroy()
+}
