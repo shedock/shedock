@@ -40,7 +40,7 @@ var (
 				PaddingRight(2).
 				Border(lipgloss.RoundedBorder()).
 				Render
-	commandStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Background(lipgloss.Color("12")).Render
+	commandStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("15")).Background(lipgloss.Color("12")).PaddingLeft(1).PaddingRight(1).Render
 	shellNameStyle = lipgloss.NewStyle().Foreground(lipgloss.Color("45")).Render
 	spinnerStyle   = lipgloss.NewStyle().Foreground(lipgloss.Color("9"))
 )
@@ -126,10 +126,10 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 		}
 		libs := m.builder.GetSharedLibs()
 
-		transistiveDependencies := len(libs)
+		transitiveDependencies := len(libs)
 		return getTransitiveDependenciesMsg(
 			bodyStyle(
-				fmt.Sprintf("\n✅ %s\n└── Found %d transitive dependencies\n", textStyle("Getting transistive dependencies"), transistiveDependencies),
+				fmt.Sprintf("\n✅ %s\n└── Found %d transitive dependencies\n", textStyle("Getting transitive dependencies"), transitiveDependencies),
 			),
 		)
 	}
@@ -169,13 +169,13 @@ func (m *model) getInsightsCmd() tea.Cmd {
 			if len(not_supported) > 0 {
 				insights += "- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:\n"
 				for _, cmd := range not_supported {
-					insights += fmt.Sprintf("  - %s\n", cmd)
+					insights += fmt.Sprintf("  - %s\n", commandStyle(cmd))
 				}
 			}
 			if len(not_found) > 0 {
 				insights += "- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:\n"
 				for _, cmd := range not_found {
-					insights += fmt.Sprintf("  - %s\n", cmd)
+					insights += fmt.Sprintf("  - %s\n", commandStyle(cmd))
 				}
 			}
 

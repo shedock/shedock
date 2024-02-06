@@ -81,31 +81,6 @@
 - Busybox
   - https://www.busybox.net/
 
-## CLI Interface
-
-```
-✅ Analyzing shell script
-   - Shell recognized: bash
-   - Found 10 dependencies
-✅ Getting transistive dependencies
-   - Found 5 transistive dependencies
-✅ Generating Dockerfile
-   - Dockerfile generated at <path>
-✅ Building image
-   - Image built successfully!
-   - Run the following command to start a container for your image:
-     $ docker run -it --rm <image>:latest
-
-👀 Insights:
-- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:
-  - xdg-open
-  - notify-send
-- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:
-  - ripgrep
-  - dog
-
-Report any issues at <link>
-```
 
 ## Checklist for use-cases while Dockerizing a shell script
 
