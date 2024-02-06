@@ -18,18 +18,18 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 
 ### You own it
 
-- Shedock will generate a heavily documented Dockerfile, so that you can understand what's going on.
+- Shedock will generate a heavily documented Dockerfile so that you can understand what's going on.
 - This way shedock encourages users to learn and maintain the `Dockerfile` on their own (we are planning to cover this bridge as well).
 
 ### Insights
 
-- We would be lying to ourselves if we say all edge cases our covered. shedock WILL fail on some weird cases.
-- But we try to figure out what those scenarios are and generate tips for you. So that you can take the best decision until shedock becomes capable to fix it.
+- We would be lying to ourselves if we say all edge cases are covered. shedock WILL fail in some weird cases.
+- But we try to figure out what those scenarios are and generate tips for you. So that you can make the best decision until shedock becomes capable of fixing it.
 
 
 ## Who is `shedock` built for?
 
-- Authors, folks who want to distribute their shell based apps, or bring a new life to them ☘️. Dockerizing your shellscripts make them available to EVERYONE!
+- Authors, folks who want to distribute their shell-based apps, or bring a new life to them ☘️. Dockerizing your shell scripts makes them available to EVERYONE!
 - Users, folks who don't like installing random shell scripts from the internet & want a nice controllable isolated environment for them i.e. containers.
 - Folks who want to consider `Docker` as a packaging format for their shell scripts.
 
@@ -93,18 +93,18 @@ List & status of shells supported by shedock:
 
 ### `Docker` is not a package manager, why are we using it to package shell scripts?
 
-- It's literally built to share your work across different systems. `brew` is not popular in Linux, Flatpaks, AppImages don't work on Mac, and Windows has its package manager now. How much time do you want to spend just packaging stuff compared to people actually using your work?
+- It's literally built to share your work across different systems. `brew` is not popular with Linux, Flatpaks, AppImages don't work on Mac, and Windows Terminals has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
 
 ### What about other tools like `docker-squash` & `docker-slim`?
 
 - They are great, they have a big community behind them actively building and fixing stuff. Give them a try before using shedock.
-- shedock is not built having competition in mind, but rather, "education" we want devs to know what exactly is required to run their script. Not hiding stuff behind some weird magic.
+- shedock is built to educate devs, we want folks to know what exactly is required to run their script. Not hiding stuff behind some weird magic.
 
-### Why not build this for all tech stacks, why only shell-scripts?
+### Why not build this for all tech stacks, why only shell scripts?
 
-- A: because when you are building for everyone, you are building for no-one.
+- A: because when you are building for everyone, you are building for no one.
 - B: the author is biased towards writing and sharing shell scripts.
-- C: the author doesn't have the mental energy to build & test it across a 1000 stacks.
+- C: the author doesn't have the mental energy to build & test it across 100s of tech stacks.
 
 ### I don't think you are building this right
 
