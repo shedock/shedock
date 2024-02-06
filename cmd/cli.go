@@ -65,10 +65,18 @@ func (m *model) analyzeShellScriptCmd() tea.Cmd {
 		if err != nil {
 			return err
 		}
+		err = m.builder.UsedSystemBuiltins()
+		if err != nil {
+			return err
+		}
 
 		shell, _ := m.builder.Script.GetShell()
+		err = m.builder.LoadScriptDeps()
+		if err != nil {
+			return err
+		}
 
-		scriptDeps, err := m.builder.Script.Dependencies()
+		scriptDeps := m.builder.GetScriptDeps()
 		if err != nil {
 			return err
 		}
@@ -85,24 +93,40 @@ func (m *model) analyzeShellScriptCmd() tea.Cmd {
 
 func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 	return func() tea.Msg {
-		// load ls, cat etc
-		err := m.builder.LoadSystemBuiltins()
+		err := m.builder.LoadShellBuiltins()
 		if err != nil {
 			return err
 		}
-		// load dependencies shipped with the shell
-		err = m.builder.LoadShellBuiltins()
+		// remove not-supported commands from script deps
+		// remove shell-builtins and system-builtins from script deps and find what we can get from package manager
+		filteredDeps := m.builder.FilterCmdsToInstall()
+		err = m.builder.DependenciesAvailableOnPackageHost(filteredDeps)
 		if err != nil {
 			return err
 		}
+		// commands not available on apk come under not found
+		var notFound []string
+		for _, dep := range filteredDeps {
+			var found bool
+			for _, cmd := range m.builder.GetCmdOnApk() {
+				if dep == cmd {
+					found = true
+					break
+				}
+			}
+			if !found {
+				notFound = append(notFound, dep)
+			}
+		}
+		m.builder.UpdatesCmdsNotFound(notFound)
 
-		// shellbuiltins := m.builder.GetShellBuiltins()
-		// if err != nil {
-		// 	return err
-		// }
+		err = m.builder.LoadAllSharedLibs()
+		if err != nil {
+			return err
+		}
+		libs := m.builder.GetSharedLibs()
 
-		// time.Sleep(1 * time.Second)
-		transistiveDependencies := 5
+		transistiveDependencies := len(libs)
 		return getTransitiveDependenciesMsg(
 			bodyStyle(
 				fmt.Sprintf("\n✅ %s\n└── Found %d transitive dependencies\n", textStyle("Getting transistive dependencies"), transistiveDependencies),
@@ -135,15 +159,31 @@ func (m *model) buildImageCmd() tea.Cmd {
 
 func (m *model) getInsightsCmd() tea.Cmd {
 	return func() tea.Msg {
-		// time.Sleep(2 * time.Second)
-		var insights string
-		// var title string
-		title := fmt.Sprintf("\n\n%s\n", textStyleInsights("We are not perfect!"))
-		insights += fmt.Sprintf("- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:\n  - xdg-open\n  - notify-send\n- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:\n  - ripgrep\n  - dog")
-		insights += fmt.Sprintf("\n\n%s\n\n", "Report any issues at link")
 
-		wrappedText := wordwrap.WrapString(insights, 80) // Wrap text after 80 characters
-		return insightsMsg(title + wrappedText)
+		not_found := m.builder.GetCmdNotOnApk()
+		not_supported := m.builder.GetCmdNotSupported()
+		if len(not_found) > 0 || len(not_supported) > 0 {
+			var insights string
+
+			title := fmt.Sprintf("\n\n%s\n", textStyleInsights("We are not perfect!"))
+			if len(not_supported) > 0 {
+				insights += "- We have recognized some dependencies that cannot work in a containerized environment. Consider removing them from your script or adding workarounds for them:\n"
+				for _, cmd := range not_supported {
+					insights += fmt.Sprintf("  - %s\n", cmd)
+				}
+			}
+			if len(not_found) > 0 {
+				insights += "- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:\n"
+				for _, cmd := range not_found {
+					insights += fmt.Sprintf("  - %s\n", cmd)
+				}
+			}
+
+			insights += fmt.Sprintf("\n\n%s\n\n", "Report any issues at link")
+			wrappedText := wordwrap.WrapString(insights, 80) // Wrap text after 80 characters
+			return insightsMsg(title + wrappedText)
+		}
+		return insightsMsg("")
 	}
 }
 

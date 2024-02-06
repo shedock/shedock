@@ -48,62 +48,19 @@ func (i *ImageBuilder) Build() error {
 		return err
 	}
 
-	shellType, err := i.Script.GetShell()
+	err = i.LoadScriptDeps()
 	if err != nil {
 		return err
 	}
-	_, err = shell.NewShell(shellType)
-	if err != nil {
-		log.Fatalf("Failed to get shell: %v", err)
-	}
-
-	scriptDeps, err := i.Script.Dependencies()
-	if err != nil {
-		return err
-	}
-	i.scriptDeps = scriptDeps
 
 	err = i.LoadShellBuiltins()
 	if err != nil {
 		return err
 	}
 
-	for _, dep := range scriptDeps {
-		var found bool
-
-		// Check if the dependency is a shell builtin
-		for _, builtin := range i.GetShellBuiltins() {
-			if dep.Name == builtin {
-				found = true
-				break
-			}
-		}
-
-		// Check if the dependency is a system builtin
-		for _, builtin := range i.GetSystemBuiltins() {
-			if strings.Contains(builtin, dep.Name) {
-				found = true
-				break
-			}
-		}
-
-		// Check if the dependency cannot be used in a containerized environment
-		for _, cmd := range insights.NOT_SUPPORTED_COMMANDS {
-			if dep.Name == cmd {
-				found = true
-				i.cmdNotSupported = append(i.cmdNotSupported, dep.Name)
-				break
-			}
-		}
-
-		if !found {
-			// its not a builtin, so we need to install it
-			filteredDeps = append(filteredDeps, dep.Name)
-		}
-	}
-
 	// remove not-supported commands from script deps
 	// remove shell-builtins and system-builtins from script deps and find what we can get from package manager
+	filteredDeps = i.FilterCmdsToInstall()
 	err = i.DependenciesAvailableOnPackageHost(filteredDeps)
 	if err != nil {
 		return err
@@ -122,9 +79,9 @@ func (i *ImageBuilder) Build() error {
 		}
 	}
 
-	log.Println("Commands not found on apk: ", i.cmdNotOnApk)
-	log.Println("Commands not supported in containerized environment: ", i.cmdNotSupported)
-	log.Println("Commands that can be installed: ", i.cmdOnApk)
+	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
+	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
+	log.Println("Commands that can be installed: ", i.GetCmdOnApk())
 	err = i.LoadAllSharedLibs()
 	if err != nil {
 		return err
@@ -195,19 +152,19 @@ func (i *ImageBuilder) GetShellBinaryBuiltins() ([]string, error) {
 	container := instance.GetDockerInstance()
 	_, err := container.ExecCommand(i.Shell.InstallShellCommand())
 	if err != nil {
-		log.Fatalf("%v", err)
+		return []string{}, fmt.Errorf("%v", err)
 	}
 
 	// Execute the info command again to get the stuff installed by the shell
 	output, err := container.ExecCommand(i.Shell.InfoCommand())
 	if err != nil {
-		log.Fatalf("%v", err)
+		return []string{}, fmt.Errorf("%v", err)
 	}
 
 	// Parse the output
 	binDeps, err := i.Shell.BinaryDependencies([]byte(output))
 	if err != nil {
-		log.Fatalf("Failed to parse dependencies: %v", err)
+		return []string{}, fmt.Errorf("failed to parse dependencies: %v", err)
 	}
 
 	return binDeps, nil
@@ -244,18 +201,6 @@ func (i *ImageBuilder) DependenciesAvailableOnPackageHost(deps []string) error {
 	return err
 }
 
-func (i *ImageBuilder) GetSystemBuiltins() []string {
-	return i.systemBuiltins
-}
-
-func (i *ImageBuilder) GetScriptDeps() []shellScriptTypes.Dependency {
-	return i.scriptDeps
-}
-
-func (i *ImageBuilder) GetShellBuiltins() []string {
-	return i.shellbuiltns
-}
-
 func (i *ImageBuilder) LoadAllSharedLibs() error {
 	// Combine libraries from
 	// 1. System Builtins used
@@ -265,6 +210,7 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 
 	var deps []string
 	var sl []ldd.Library
+	uniqueLibs := make(map[string]bool)
 
 	deps = append(deps, i.usedSystemBuiltins...)
 
@@ -282,7 +228,7 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 	}
 	deps = append(deps, shellname)
 
-	log.Println("deps to figure out: ", deps)
+	// log.Println("deps to figure out: ", deps)
 	for _, dep := range deps {
 		// Execute the info command again to get the stuff installed by the shell
 		output, err := container.ExecCommand(fmt.Sprintf("ldd $(which %s)", dep))
@@ -294,7 +240,12 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 		if err != nil {
 			return err
 		}
-		sl = append(sl, libs...)
+		for _, lib := range libs {
+			if _, exists := uniqueLibs[lib.SoName]; !exists {
+				sl = append(sl, lib)
+				uniqueLibs[lib.SoName] = true
+			}
+		}
 	}
 
 	i.sharedLibs = sl
@@ -319,7 +270,91 @@ func (i *ImageBuilder) UsedSystemBuiltins() error {
 			}
 		}
 	}
-	log.Println("used system builtins: ", usedSystemBuiltins)
+	// log.Println("used system builtins: ", usedSystemBuiltins)
 	i.usedSystemBuiltins = usedSystemBuiltins
 	return nil
+}
+
+func (i *ImageBuilder) FilterCmdsToInstall() []string {
+	var filteredDeps []string
+
+	for _, dep := range i.scriptDeps {
+		var found bool
+
+		// Check if the dependency is a shell builtin
+		for _, builtin := range i.GetShellBuiltins() {
+			if dep.Name == builtin {
+				found = true
+				break
+			}
+		}
+
+		// Check if the dependency is a system builtin
+		for _, builtin := range i.GetSystemBuiltins() {
+			if strings.Contains(builtin, dep.Name) {
+				found = true
+				break
+			}
+		}
+
+		// Check if the dependency cannot be used in a containerized environment
+		for _, cmd := range insights.NOT_SUPPORTED_COMMANDS {
+			if dep.Name == cmd {
+				found = true
+				i.cmdNotSupported = append(i.cmdNotSupported, dep.Name)
+				break
+			}
+		}
+
+		if !found {
+			// its not a builtin, so we need to install it
+			filteredDeps = append(filteredDeps, dep.Name)
+		}
+	}
+	return filteredDeps
+}
+
+func (i *ImageBuilder) GetSharedLibs() []ldd.Library {
+	return i.sharedLibs
+}
+
+func (i *ImageBuilder) GetUsedSystemBuiltins() []string {
+	return i.usedSystemBuiltins
+}
+
+func (i *ImageBuilder) GetSystemBuiltins() []string {
+	return i.systemBuiltins
+}
+
+func (i *ImageBuilder) GetScriptDeps() []shellScriptTypes.Dependency {
+	return i.scriptDeps
+}
+
+func (i *ImageBuilder) GetShellBuiltins() []string {
+	return i.shellbuiltns
+}
+
+func (i *ImageBuilder) GetCmdOnApk() []string {
+	return i.cmdOnApk
+}
+
+func (i *ImageBuilder) GetCmdNotOnApk() []string {
+	return i.cmdNotOnApk
+}
+
+func (i *ImageBuilder) GetCmdNotSupported() []string {
+	return i.cmdNotSupported
+}
+
+func (i *ImageBuilder) LoadScriptDeps() error {
+	scriptDeps, err := i.Script.Dependencies()
+	if err != nil {
+		return err
+	}
+	i.scriptDeps = scriptDeps
+	return err
+}
+
+func (i *ImageBuilder) UpdatesCmdsNotFound(cmds []string) {
+	i.cmdNotOnApk = cmds
 }
