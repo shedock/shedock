@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"log"
+	"os"
 	"shedock/internal/insights"
 	"shedock/internal/instance"
 	apkTypes "shedock/pkg/parsers/apk"
@@ -79,6 +80,8 @@ func (i *ImageBuilder) Build() error {
 		}
 	}
 
+	log.Println("Script dependencies: ", i.GetScriptDeps())
+	os.Exit(0)
 	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
 	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
 	log.Println("Commands that can be installed: ", i.GetCmdOnApk())

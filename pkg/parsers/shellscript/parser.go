@@ -4,6 +4,7 @@ import (
 	"bufio"
 	"fmt"
 	"os"
+	"reflect"
 	"sort"
 	"strings"
 
@@ -33,15 +34,26 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 	var finalDeps []Dependency
 
 	funcDel := make(map[string]*syntax.FuncDecl)
+	variableDel := make(map[string]*syntax.Assign)
 	uniqDeps := make(map[string]Dependency)
+
+	// alphaRegex, err := regexp.Compile("^[a-z]{2,}$")
+	// if err != nil {
+	// 	return nil, err
+	// }
 
 	// Walk the AST and classify nodes
 	syntax.Walk(file, func(node syntax.Node) bool {
 		switch n := node.(type) {
+		// case *syntax.CmdSubst:
+		// case *syntax.Word:
 		case *syntax.CallExpr:
+			fmt.Println("CallExpr", reflect.TypeOf(n))
 			if len(n.Args) > 0 {
 				word := n.Args[0]
+				// fmt.Println(word.Parts)
 				for _, part := range word.Parts {
+					// fmt.Println(part, reflect.TypeOf(part))
 					if lit, ok := part.(*syntax.Lit); ok {
 						// add to uniqDeps if not already present
 						if _, ok := uniqDeps[lit.Value]; !ok {
@@ -53,6 +65,7 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 						// collect arguments
 						args := []string{}
 						for _, arg := range n.Args[1:] {
+							// fmt.Println(arg.Parts, reflect.TypeOf(arg.Parts))
 							for _, argPart := range arg.Parts {
 								if argLit, ok := argPart.(*syntax.Lit); ok {
 									args = append(args, argLit.Value)
@@ -69,6 +82,25 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 			}
 		case *syntax.FuncDecl:
 			funcDel[n.Name.Value] = n
+		// case *syntax.Word:
+		// 	if len(n.Parts) > 0 {
+		// 		for _, part := range n.Parts {
+		// 			if lit, ok := part.(*syntax.Lit); ok {
+		// 				if alphaRegex.MatchString(lit.Value) {
+		// 					if _, ok := uniqDeps[lit.Value]; !ok {
+		// 						uniqDeps[lit.Value] = Dependency{
+		// 							Name: lit.Value,
+		// 						}
+		// 					}
+		// 				}
+		// 			}
+		// 		}
+		// 	}
+		case *syntax.Assign:
+			variableDel[n.Name.Value] = n
+			// default:
+			// fmt.Println("default", reflect.TypeOf(n))
+			// fmt.Println(n.Args[0])
 		}
 		return true
 	})
@@ -79,6 +111,7 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 			finalDeps = append(finalDeps, d)
 		}
 	}
+
 	// sort by name
 	sort.Slice(finalDeps, func(i, j int) bool {
 		return finalDeps[i].Name < finalDeps[j].Name
