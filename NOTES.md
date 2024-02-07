@@ -54,6 +54,7 @@
 - Automatically detect color codes in the shell script and add `TERM=xterm-256color` to the Dockerfile.
   - https://stackoverflow.com/a/20983251
   - https://chadaustin.me/2024/01/truecolor-terminal-emacs/
+- Usage of `/dev/urandom`, `/dev/null` in shell scripts.
 
 ## Projects to use for testing
 
@@ -61,6 +62,8 @@
 - https://github.com/jarun/ddgr
 - https://github.com/HarshitJoshi9152/libgen
 - https://github.com/kamranahmedse/git-standup
+- https://github.com/bigH/git-fuzzy
+- https://github.com/wfxr/forgit
 - Find more on https://github.com/search?q=language%3AShell+&type=repositories
 
 
@@ -80,7 +83,10 @@
   - https://leftasexercise.com/2018/04/12/docker-internals-process-isolation-with-namespaces-and-cgroups/
 - Busybox
   - https://www.busybox.net/
-
+- Packaging
+  - https://ramcq.net/2024/02/06/flathub-pros-and-cons-of-direct-uploads/
+- CLI Guidelines
+  - https://clig.dev/
 
 ## Checklist for use-cases while Dockerizing a shell script
 
