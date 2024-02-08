@@ -87,6 +87,14 @@
   - https://ramcq.net/2024/02/06/flathub-pros-and-cons-of-direct-uploads/
 - CLI Guidelines
   - https://clig.dev/
+- Buildpacks
+  - https://nixpacks.com/docs
+  - https://buildpacks.io/docs/
+- Buildkit
+  - https://depot.dev/blog/buildkit-in-depth
+- Dockerfile security
+  - https://snyk.io/blog/10-docker-image-security-best-practices/
+  - https://betterstack.com/community/guides/scaling-docker/docker-security-best-practices/
 
 ## Checklist for use-cases while Dockerizing a shell script
 
