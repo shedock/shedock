@@ -65,10 +65,6 @@ func (m *model) analyzeShellScriptCmd() tea.Cmd {
 		if err != nil {
 			return err
 		}
-		err = m.builder.UsedSystemBuiltins()
-		if err != nil {
-			return err
-		}
 
 		shell, _ := m.builder.Script.GetShell()
 		err = m.builder.LoadScriptDeps()
@@ -77,6 +73,11 @@ func (m *model) analyzeShellScriptCmd() tea.Cmd {
 		}
 
 		scriptDeps := m.builder.GetScriptDeps()
+		if err != nil {
+			return err
+		}
+
+		err = m.builder.UsedSystemBuiltins()
 		if err != nil {
 			return err
 		}

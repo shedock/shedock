@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"os"
 	"reflect"
+	"regexp"
 	"sort"
 	"strings"
 
@@ -36,11 +37,12 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 	funcDel := make(map[string]*syntax.FuncDecl)
 	variableDel := make(map[string]*syntax.Assign)
 	uniqDeps := make(map[string]Dependency)
+	var allArgs []string
 
-	// alphaRegex, err := regexp.Compile("^[a-z]{2,}$")
-	// if err != nil {
-	// 	return nil, err
-	// }
+	alphaRegex, err := regexp.Compile("^[a-z]{2,}$")
+	if err != nil {
+		return nil, err
+	}
 
 	// Walk the AST and classify nodes
 	syntax.Walk(file, func(node syntax.Node) bool {
@@ -48,7 +50,7 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 		// case *syntax.CmdSubst:
 		// case *syntax.Word:
 		case *syntax.CallExpr:
-			fmt.Println("CallExpr", reflect.TypeOf(n))
+			// fmt.Println("CallExpr", reflect.TypeOf(n))
 			if len(n.Args) > 0 {
 				word := n.Args[0]
 				// fmt.Println(word.Parts)
@@ -72,45 +74,65 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 								}
 							}
 						}
-						// add arguments to the dependency
-						uniqDeps[lit.Value] = Dependency{
-							Name: lit.Value,
-							Args: args,
+						// make sure the args are appended to the dependency if it already exists
+						if dep, ok := uniqDeps[lit.Value]; ok {
+							// TODO only add unique args
+							dep.Args = append(dep.Args, args...)
+							uniqDeps[lit.Value] = dep
+							allArgs = append(allArgs, args...)
 						}
+						// // add arguments to the dependency
+						// uniqDeps[lit.Value] = Dependency{
+						// 	Name: lit.Value,
+						// 	Args: args,
+						// }
 					}
 				}
 			}
 		case *syntax.FuncDecl:
 			funcDel[n.Name.Value] = n
-		// case *syntax.Word:
-		// 	if len(n.Parts) > 0 {
-		// 		for _, part := range n.Parts {
-		// 			if lit, ok := part.(*syntax.Lit); ok {
-		// 				if alphaRegex.MatchString(lit.Value) {
-		// 					if _, ok := uniqDeps[lit.Value]; !ok {
-		// 						uniqDeps[lit.Value] = Dependency{
-		// 							Name: lit.Value,
-		// 						}
-		// 					}
-		// 				}
-		// 			}
-		// 		}
-		// 	}
+		case *syntax.Word:
+			if len(n.Parts) > 0 {
+				for _, part := range n.Parts {
+					if lit, ok := part.(*syntax.Lit); ok {
+						if alphaRegex.MatchString(lit.Value) {
+							if _, ok := uniqDeps[lit.Value]; !ok {
+								uniqDeps[lit.Value] = Dependency{
+									Name: lit.Value,
+								}
+							}
+						}
+					}
+				}
+			}
 		case *syntax.Assign:
+			// get variable declarations, so that we can remove them from the finalDeps later
 			variableDel[n.Name.Value] = n
-			// default:
-			// fmt.Println("default", reflect.TypeOf(n))
-			// fmt.Println(n.Args[0])
+		case *syntax.CmdSubst:
+			// TODO handle command substitution
+			fmt.Println("CmdSubst", reflect.TypeOf(n))
 		}
 		return true
 	})
 
+	// var matchvar []string
 	for _, d := range uniqDeps {
-		// check if a command is a func decl
+		// filter out function declarations
 		if _, ok := funcDel[d.Name]; !ok {
-			finalDeps = append(finalDeps, d)
+			// filter out variable declarations
+			if _, ok := variableDel[d.Name]; !ok {
+				finalDeps = append(finalDeps, d)
+			}
 		}
 	}
+
+	// // remove dep from uniqDeps that are also variables
+	// for k := range variableDel {
+	// 	if _, ok := uniqDeps[k]; ok {
+	// 		matchvar = append(matchvar, k)
+	// 	}
+	// }
+	// fmt.Println("matchvar", matchvar)
 
 	// sort by name
 	sort.Slice(finalDeps, func(i, j int) bool {

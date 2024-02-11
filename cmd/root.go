@@ -12,7 +12,7 @@ var rootCmd = &cobra.Command{
 	Short: "shedock is a CLI application",
 	Long:  `shedock is a CLI application. It accepts a filepath as an argument.`,
 	Args:  cobra.ExactArgs(1),
-	Run:   DriverCli,
+	Run:   Driver,
 }
 
 var versionCmd = &cobra.Command{

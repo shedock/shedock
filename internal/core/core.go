@@ -44,12 +44,12 @@ func (i *ImageBuilder) Build() error {
 		return err
 	}
 
-	err = i.UsedSystemBuiltins()
+	err = i.LoadScriptDeps()
 	if err != nil {
 		return err
 	}
 
-	err = i.LoadScriptDeps()
+	err = i.UsedSystemBuiltins()
 	if err != nil {
 		return err
 	}
@@ -80,7 +80,10 @@ func (i *ImageBuilder) Build() error {
 		}
 	}
 
-	log.Println("Script dependencies: ", i.GetScriptDeps())
+	// log.Println("Script dependencies: ", i.GetScriptDeps())
+	for _, dep := range i.GetScriptDeps() {
+		fmt.Println("dep: ", dep.Name, "args: ", dep.Args)
+	}
 	os.Exit(0)
 	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
 	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
@@ -257,10 +260,8 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 }
 
 func (i *ImageBuilder) UsedSystemBuiltins() error {
-	scriptDeps, err := i.Script.Dependencies()
-	if err != nil {
-		return err
-	}
+	scriptDeps := i.GetScriptDeps()
+
 	var usedSystemBuiltins []string
 	for _, dep := range scriptDeps {
 		for _, builtin := range i.GetSystemBuiltins() {
