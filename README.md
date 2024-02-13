@@ -86,25 +86,29 @@ List & status of shells supported by shedock:
 
 ## FAQs
 
-### It's `202N`, why are we still writing shell scripts?
-
+<details>
+  <summary><h3>It's <code>202N</code>, why are we still writing shell scripts?</h3></summary>
 - `They are fun to write` + `They work`, deal with it.
-
-### `Docker` is not a package manager, why are we using it to package shell scripts?
-
-- It's literally built to share your work across different systems. `brew` is not popular with Linux, Flatpaks, AppImages don't work on Mac, and Windows Terminals has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
-
-### What about other tools like `docker-squash` & `docker-slim`?
+</details>
+<details>
+  <summary><h3><code>Docker</code> is not a package manager, why are we using it to package shell scripts?</h3></summary>
+- It's literally built to share your work across different systems. `brew` is not popular with Linux. Flatpaks, AppImages don't work on Mac, and the new Windows Terminal has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
+</details>
+<details>
+  <summary><h3>What about other tools like <code>docker-squash</code> & <code>docker-slim</code>?</h3></summary>
 
 - They are great, they have a big community behind them actively building and fixing stuff. Give them a try before using shedock.
 - shedock is built to educate devs, we want folks to know what exactly is required to run their script. Not hiding stuff behind some weird magic.
-
-### Why not build this for all tech stacks, why only shell scripts?
+</details>
+<details>
+<summary><h3>Why not build this for all tech stacks, why only shell scripts?</h3></summary>
 
 - A: because when you are building for everyone, you are building for no one.
 - B: the author is biased towards writing and sharing shell scripts 🤓.
 - C: the author doesn't have the mental energy to build & test it across 100s of tech stacks.
+</details>
+<details>
+<summary><h3>I don't think you are building this right</h3></summary>
 
-### I don't think you are building this right
-
-- Great, we have something in common 🙃. I am figuring stuff on the go. If you think something can be improved, [start a new discussion](https://github.com/shedock/shedock/discussions) and leave me some helpful tips.
+- Great, we have something in common 🙃. I am figuring out stuff on the go. If you think something can be improved, [start a new discussion](https://github.com/shedock/shedock/discussions) and leave me some helpful tips.
+</details>
