@@ -4,7 +4,6 @@ import (
 	"bufio"
 	"fmt"
 	"os"
-	"reflect"
 	"regexp"
 	"sort"
 	"strings"
@@ -38,6 +37,7 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 	variableDel := make(map[string]*syntax.Assign)
 	uniqDeps := make(map[string]Dependency)
 	var allArgs []string
+	argsMap := make(map[string]string)
 
 	alphaRegex, err := regexp.Compile("^[a-z]{2,}$")
 	if err != nil {
@@ -47,15 +47,10 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 	// Walk the AST and classify nodes
 	syntax.Walk(file, func(node syntax.Node) bool {
 		switch n := node.(type) {
-		// case *syntax.CmdSubst:
-		// case *syntax.Word:
 		case *syntax.CallExpr:
-			// fmt.Println("CallExpr", reflect.TypeOf(n))
 			if len(n.Args) > 0 {
 				word := n.Args[0]
-				// fmt.Println(word.Parts)
 				for _, part := range word.Parts {
-					// fmt.Println(part, reflect.TypeOf(part))
 					if lit, ok := part.(*syntax.Lit); ok {
 						// add to uniqDeps if not already present
 						if _, ok := uniqDeps[lit.Value]; !ok {
@@ -80,12 +75,10 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 							dep.Args = append(dep.Args, args...)
 							uniqDeps[lit.Value] = dep
 							allArgs = append(allArgs, args...)
+							for _, arg := range args {
+								argsMap[arg] = lit.Value
+							}
 						}
-						// // add arguments to the dependency
-						// uniqDeps[lit.Value] = Dependency{
-						// 	Name: lit.Value,
-						// 	Args: args,
-						// }
 					}
 				}
 			}
@@ -108,9 +101,24 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 		case *syntax.Assign:
 			// get variable declarations, so that we can remove them from the finalDeps later
 			variableDel[n.Name.Value] = n
-		case *syntax.CmdSubst:
-			// TODO handle command substitution
-			fmt.Println("CmdSubst", reflect.TypeOf(n))
+			// case *syntax.CmdSubst:
+			// 	// TODO handle command substitution
+			// 	for _, part := range n.StmtList.Stmts {
+			// 		switch cmd := part.Cmd.(type) {
+			// 		case *syntax.CallExpr:
+			// 			word := cmd.Args[0]
+			// 			for _, part := range word.Parts {
+			// 				if lit, ok := part.(*syntax.Lit); ok {
+			// 					fmt.Println(lit.Value, reflect.TypeOf(lit))
+			// 				}
+			// 			}
+			// 			// Handle CallExpr...
+			// 		case *syntax.BinaryCmd:
+			// 			// Handle BinaryCmd...
+			// 		default:
+			// 			fmt.Println("Other type found", reflect.TypeOf(part.Cmd))
+			// 		}
+			// 	}
 		}
 		return true
 	})
@@ -126,13 +134,22 @@ func (s *Script) Dependencies() ([]Dependency, error) {
 		}
 	}
 
-	// // remove dep from uniqDeps that are also variables
-	// for k := range variableDel {
-	// 	if _, ok := uniqDeps[k]; ok {
-	// 		matchvar = append(matchvar, k)
-	// 	}
-	// }
-	// fmt.Println("matchvar", matchvar)
+	// // remove dependencies that are actually arguments to other dependencies
+	for _, arg := range allArgs {
+		for i, dep := range finalDeps {
+			// ignore if the arg belongs to xargs or command dependency
+			if _, ok := argsMap[arg]; ok {
+				if argsMap[arg] == "xargs" || argsMap[arg] == "command" {
+					continue
+				}
+			}
+			// remove the dependency if it's an argument to another dependency
+			// what the hell am I doing here?
+			if dep.Name == arg {
+				finalDeps = append(finalDeps[:i], finalDeps[i+1:]...)
+			}
+		}
+	}
 
 	// sort by name
 	sort.Slice(finalDeps, func(i, j int) bool {
