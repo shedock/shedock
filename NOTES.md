@@ -30,14 +30,6 @@
 - https://github.com/ogham/dog
 
 
-## Shells to support in the future
-
-- https://pkgs.alpinelinux.org/package/edge/main/armhf/mksh
-- https://pkgs.alpinelinux.org/package/edge/main/armhf/dash
-- https://github.com/ibara/oksh
-- https://pkgs.alpinelinux.org/package/v3.18/community/x86_64/powershell
-- https://github.com/nushell/nushell
-- https://elv.sh/ (not on alpine main repo, only on edge)
 
 ## Gotchas to tackle in the future
 
@@ -95,6 +87,8 @@
 - Dockerfile security
   - https://snyk.io/blog/10-docker-image-security-best-practices/
   - https://betterstack.com/community/guides/scaling-docker/docker-security-best-practices/
+- BusyBox
+  - https://unix.stackexchange.com/questions/274273/are-busybox-commands-truly-built-in
 
 ## Checklist for use-cases while Dockerizing a shell script
 
