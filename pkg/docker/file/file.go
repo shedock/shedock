@@ -12,20 +12,29 @@ type Dockerfile struct {
 }
 
 const (
-	FirstLayerAlias string = "builder"
+	FirstLayerBaseImage  string = "alpine:latest"
+	SecondLayerBaseImage string = "scratch"
+	FirstLayerAlias      string = "builder"
 )
 
 func (d *Dockerfile) FirstLayer() (string, error) {
-	base := fmt.Sprintf("FROM alpine:latest as %s\n", FirstLayerAlias)
-	install := "RUN apk add --no-cache \\\n"
-	for depCount, dep := range d.DependenciesToInstall {
-		if depCount == len(d.DependenciesToInstall)-1 {
-			install += fmt.Sprintf("    %s\n", dep)
-			break
-		} else {
-			install += fmt.Sprintf("    %s \\\n", dep)
+	var install string
+
+	base := fmt.Sprintf("FROM %s as %s\n", FirstLayerBaseImage, FirstLayerAlias)
+
+	if len(d.DependenciesToInstall) > 0 {
+		install = "RUN apk add --no-cache \\\n"
+
+		for depCount, dep := range d.DependenciesToInstall {
+			if depCount == len(d.DependenciesToInstall)-1 {
+				install += fmt.Sprintf("    %s\n", dep)
+				break
+			} else {
+				install += fmt.Sprintf("    %s \\\n", dep)
+			}
 		}
 	}
+
 	install += "\n"
 
 	install += fmt.Sprintf("COPY %s .\n", d.Script)
@@ -34,7 +43,7 @@ func (d *Dockerfile) FirstLayer() (string, error) {
 }
 
 func (d *Dockerfile) SecondLayer() (string, error) {
-	base := "\nFROM scratch\n"
+	base := fmt.Sprintf("\nFROM %s\n", SecondLayerBaseImage)
 	base += labels()
 
 	copyInstructionSet := d.generateCopyInstructionSet()
@@ -75,8 +84,8 @@ func (d *Dockerfile) Build() (string, error) {
 
 func labels() string {
 	lables := `
-LABEL version="<version>"
 LABEL description="<description>"
+# Add your name & email here
 LABEL maintainer="<your name> <your email>"
 `
 	return lables

@@ -152,11 +152,32 @@ func (c *Container) ExecCommand(command string) (string, error) {
 func pullImage(cli *client.Client, imageName string) error {
 	ctx := context.Background()
 
+	// dont pull the image if it already exists
+	_, _, err := cli.ImageInspectWithRaw(ctx, imageName)
+	if err == nil {
+		// image exists, lets goo!
+		return nil
+	}
+
 	out, err := cli.ImagePull(ctx, imageName, types.ImagePullOptions{})
 	if err != nil {
 		return err
 	}
 	defer out.Close()
+
+	return nil
+}
+
+func BuildImage(cli *client.Client, ctx context.Context, buildContext io.Reader, tags []string) error {
+	opts := types.ImageBuildOptions{
+		Tags: tags,
+	}
+
+	resp, err := cli.ImageBuild(ctx, buildContext, opts)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
 
 	return nil
 }

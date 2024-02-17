@@ -119,7 +119,7 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 				notFound = append(notFound, dep)
 			}
 		}
-		m.builder.UpdatesCmdsNotFound(notFound)
+		m.builder.UpdateCmdsNotFound(notFound)
 
 		err = m.builder.LoadAllSharedLibs()
 		if err != nil {
@@ -139,9 +139,10 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 func (m *model) generateDockerfileCmd() tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(1 * time.Second)
+		dockerfilePath := ""
 		return generateDockerfileMsg(
 			bodyStyle(
-				fmt.Sprintf("\n✅ %s\n└── Dockerfile generated at /home/abhinav/Projects/shedock/Dockerfile\n", textStyle("Generating Dockerfile")),
+				fmt.Sprintf("\n✅ %s\n└── Dockerfile generated at %s\n", textStyle("Generating Dockerfile"), dockerfilePath),
 			),
 		)
 	}
@@ -150,9 +151,10 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 func (m *model) buildImageCmd() tea.Cmd {
 	return func() tea.Msg {
 		time.Sleep(1 * time.Second)
+		imageName := ""
 		return buildImageMsg(
 			bodyStyle(
-				fmt.Sprintf("\n✅ %s\n├── Image built successfully!\n└── Run the following command to start a container for your image:\n    > docker run -it --rm <image>:latest", textStyle("Building docker image")),
+				fmt.Sprintf("\n✅ %s\n├── Image built successfully!\n└── Run the following command to start a container for your image:\n    > docker run -it --rm %s:latest", textStyle("Building docker image"), imageName),
 			),
 		)
 	}

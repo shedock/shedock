@@ -3,7 +3,6 @@ package core
 import (
 	"fmt"
 	"log"
-	"os"
 	"shedock/internal/insights"
 	"shedock/internal/instance"
 	apkTypes "shedock/pkg/parsers/apk"
@@ -81,10 +80,15 @@ func (i *ImageBuilder) Build() error {
 	}
 
 	// log.Println("Script dependencies: ", i.GetScriptDeps())
-	for _, dep := range i.GetScriptDeps() {
-		fmt.Println("dep: ", dep.Name, "args: ", dep.Args)
-	}
-	os.Exit(0)
+	// for _, dep := range i.GetScriptDeps() {
+	// 	fmt.Println("dep: ", dep.Name, "args: ", dep.Args)
+	// }
+	// os.Exit(0)
+	// log.Println("Shell builtins: ", i.GetShellBuiltins())
+	// log.Println("System builtins: ", i.GetSystemBuiltins())
+	// os.Exit(0)
+	log.Println("Used system builtins: ", i.GetUsedSystemBuiltins())
+	log.Println("Filtered shell builtins: ", i.FilterShellBuiltins())
 	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
 	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
 	log.Println("Commands that can be installed: ", i.GetCmdOnApk())
@@ -107,7 +111,22 @@ func (i *ImageBuilder) LoadSystemBuiltins() error {
 		log.Fatalf("%v", err)
 	}
 	var builtins []string
-	builtins = append(builtins, strings.Split(output, "\n")...)
+	// re := regexp.MustCompile(`\\x[0-9A-Fa-f]{2}`)
+	for _, builtin := range strings.Split(output, "\n") {
+		if builtin != "" {
+			filteredPath := strings.Trim(builtin, "\n")
+			filteredPath = strings.Map(func(r rune) rune {
+				if (r >= 'a' && r <= 'z') || (r >= 'A' && r <= 'Z') || r == '/' {
+					return r
+				}
+				return -1
+			}, filteredPath)
+			if filteredPath == "" {
+				continue
+			}
+			builtins = append(builtins, filteredPath)
+		}
+	}
 	i.systemBuiltins = builtins
 
 	return nil
@@ -318,6 +337,25 @@ func (i *ImageBuilder) FilterCmdsToInstall() []string {
 	return filteredDeps
 }
 
+// WIP
+func (i *ImageBuilder) FilterShellBuiltins() []string {
+	var filteredDeps []string
+
+	for _, dep := range i.GetScriptDeps() {
+		var found bool
+		for _, builtin := range i.GetShellBuiltins() {
+			if strings.Contains(builtin, dep.Name) {
+				found = true
+				break
+			}
+		}
+		if !found {
+			filteredDeps = append(filteredDeps, dep.Name)
+		}
+	}
+	return filteredDeps
+}
+
 func (i *ImageBuilder) GetSharedLibs() []ldd.Library {
 	return i.sharedLibs
 }
@@ -359,6 +397,6 @@ func (i *ImageBuilder) LoadScriptDeps() error {
 	return err
 }
 
-func (i *ImageBuilder) UpdatesCmdsNotFound(cmds []string) {
+func (i *ImageBuilder) UpdateCmdsNotFound(cmds []string) {
 	i.cmdNotOnApk = cmds
 }
