@@ -42,6 +42,7 @@
   - https://stackoverflow.com/a/66974607
   - https://wiki.musl-libc.org/
 - `notify-send` wont work on containers
+  - https://github.com/ku1ik/git-dude/blob/master/git-dude#L18-L30
   - https://github.com/mikaelbr/node-notifier/issues/200
 - Automatically detect color codes in the shell script and add `TERM=xterm-256color` to the Dockerfile.
   - https://stackoverflow.com/a/20983251
@@ -51,12 +52,13 @@
 ## Projects to use for testing
 
 - https://github.com/KevCui/animepahe-dl
-- https://github.com/jarun/ddgr
 - https://github.com/HarshitJoshi9152/libgen
 - https://github.com/kamranahmedse/git-standup
 - https://github.com/bigH/git-fuzzy
 - https://github.com/wfxr/forgit
-- Find more on https://github.com/search?q=language%3AShell+&type=repositories
+- https://github.com/v1s1t0r1sh3r3/airgeddon
+- https://github.com/fcambus/ansiweather (its already on alpine)
+- Find more on https://github.com/search?q=language%3AShell+fork%3Afalse+stars%3A%3E1000&type=repositories&s=updated&o=desc
 
 
 ## Blog Ideas
