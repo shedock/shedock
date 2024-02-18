@@ -1,6 +1,9 @@
 package file
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 type Dockerfile struct {
 	Dependencies          Dependencies
@@ -69,7 +72,7 @@ func (d *Dockerfile) Entrypoint() string {
 	return fmt.Sprintf("\nENTRYPOINT [\"%s\", \"/usr/bin/%s\"]\n", d.ShellPath, d.Script)
 }
 
-func (d *Dockerfile) Build() (string, error) {
+func (d *Dockerfile) getInstructions() (string, error) {
 	firstLayer, err := d.FirstLayer()
 	if err != nil {
 		return "", err
@@ -112,4 +115,34 @@ func (d *Dockerfile) generateCopyInstructionSet() string {
 	}
 
 	return copyInstructionSet
+}
+
+func writeToFile(path, content string) error {
+	// Convert the content into bytes
+	bytes := []byte(content)
+
+	// Write the bytes to the file
+	err := os.WriteFile(path, bytes, 0644)
+
+	// If there was an error, return it
+	if err != nil {
+		return err
+	}
+
+	// If everything went well, return nil
+	return nil
+}
+
+func (d *Dockerfile) Generate() error {
+	instructions, err := d.getInstructions()
+	if err != nil {
+		return err
+	}
+
+	err = writeToFile("Dockerfile", instructions)
+	if err != nil {
+		return err
+	}
+
+	return nil
 }

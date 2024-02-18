@@ -6,6 +6,7 @@ import (
 	"os"
 	"shedock/internal/core"
 	"shedock/internal/instance"
+	"shedock/pkg/docker/file"
 	"shedock/pkg/parsers/shellscript"
 	"shedock/pkg/shell"
 	"time"
@@ -138,7 +139,61 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 
 func (m *model) generateDockerfileCmd() tea.Cmd {
 	return func() tea.Msg {
-		time.Sleep(1 * time.Second)
+		var deps file.Dependencies
+		var bins []file.Dependency
+		var libs []file.Dependency
+
+		shell, _ := m.builder.Script.GetShell()
+
+		// TODO
+		// add system builtins to the dockerfile
+		// add extra commands to the dockerfile
+		// add shared libraries to the dockerfile
+		systemBuiltins := m.builder.GetUsedSystemBuiltins()
+		externalCommands := m.builder.GetCmdOnApk()
+		sharedLibs := m.builder.GetSharedLibs()
+
+		for _, cmd := range systemBuiltins {
+			bins = append(bins, file.Dependency{
+				FromPath:   cmd,
+				ToPath:     cmd,
+				Requiredby: "",
+			})
+		}
+
+		for _, cmd := range externalCommands {
+			bins = append(bins, file.Dependency{
+				FromPath:   cmd,
+				ToPath:     cmd,
+				Requiredby: "",
+			})
+		}
+
+		for _, lib := range sharedLibs {
+			libs = append(libs, file.Dependency{
+				FromPath:   lib.FullPath,
+				ToPath:     lib.FullPath,
+				Requiredby: "",
+			})
+		}
+
+		deps = file.Dependencies{
+			Bin: bins,
+			Lib: libs,
+		}
+
+		file := &file.Dockerfile{
+			DependenciesToInstall: m.builder.GetCmdOnApk(),
+			Script:                m.builder.Script.ScriptPath,
+			ShellPath:             shell,
+			Dependencies:          deps,
+		}
+
+		err := file.Generate()
+		if err != nil {
+			return err
+		}
+
 		dockerfilePath := ""
 		return generateDockerfileMsg(
 			bodyStyle(

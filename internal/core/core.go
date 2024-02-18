@@ -84,11 +84,11 @@ func (i *ImageBuilder) Build() error {
 	// 	fmt.Println("dep: ", dep.Name, "args: ", dep.Args)
 	// }
 	// os.Exit(0)
-	// log.Println("Shell builtins: ", i.GetShellBuiltins())
+	log.Println("Shell builtins: ", i.GetShellBuiltins())
 	// log.Println("System builtins: ", i.GetSystemBuiltins())
 	// os.Exit(0)
-	log.Println("Used system builtins: ", i.GetUsedSystemBuiltins())
-	log.Println("Filtered shell builtins: ", i.FilterShellBuiltins())
+	log.Println("Script deps after filter system builtins: ", i.GetUsedSystemBuiltins())
+	log.Println("Script deps after filter shell builtins: ", i.FilterShellBuiltins())
 	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
 	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
 	log.Println("Commands that can be installed: ", i.GetCmdOnApk())
@@ -278,12 +278,22 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 	return nil
 }
 
+func (i *ImageBuilder) LoadScriptDeps() error {
+	scriptDeps, err := i.Script.Dependencies()
+	if err != nil {
+		return err
+	}
+	i.scriptDeps = scriptDeps
+	return err
+}
+
 func (i *ImageBuilder) UsedSystemBuiltins() error {
 	scriptDeps := i.GetScriptDeps()
+	systemBuiltins := i.GetSystemBuiltins()
 
 	var usedSystemBuiltins []string
 	for _, dep := range scriptDeps {
-		for _, builtin := range i.GetSystemBuiltins() {
+		for _, builtin := range systemBuiltins {
 			// get basename of the binary
 			baseBuiltIn := strings.Split(builtin, "/")
 			builtinName := baseBuiltIn[len(baseBuiltIn)-1]
@@ -293,19 +303,23 @@ func (i *ImageBuilder) UsedSystemBuiltins() error {
 			}
 		}
 	}
-	// log.Println("used system builtins: ", usedSystemBuiltins)
 	i.usedSystemBuiltins = usedSystemBuiltins
+
 	return nil
 }
 
 func (i *ImageBuilder) FilterCmdsToInstall() []string {
 	var filteredDeps []string
 
-	for _, dep := range i.scriptDeps {
+	shellBuiltins := i.GetShellBuiltins()
+	scriptDeps := i.GetScriptDeps()
+	systemBuiltins := i.GetSystemBuiltins()
+
+	for _, dep := range scriptDeps {
 		var found bool
 
 		// Check if the dependency is a shell builtin
-		for _, builtin := range i.GetShellBuiltins() {
+		for _, builtin := range shellBuiltins {
 			if dep.Name == builtin {
 				found = true
 				break
@@ -313,7 +327,7 @@ func (i *ImageBuilder) FilterCmdsToInstall() []string {
 		}
 
 		// Check if the dependency is a system builtin
-		for _, builtin := range i.GetSystemBuiltins() {
+		for _, builtin := range systemBuiltins {
 			if strings.Contains(builtin, dep.Name) {
 				found = true
 				break
@@ -341,9 +355,12 @@ func (i *ImageBuilder) FilterCmdsToInstall() []string {
 func (i *ImageBuilder) FilterShellBuiltins() []string {
 	var filteredDeps []string
 
-	for _, dep := range i.GetScriptDeps() {
+	shellBuiltins := i.GetShellBuiltins()
+	scriptDeps := i.GetScriptDeps()
+
+	for _, dep := range scriptDeps {
 		var found bool
-		for _, builtin := range i.GetShellBuiltins() {
+		for _, builtin := range shellBuiltins {
 			if strings.Contains(builtin, dep.Name) {
 				found = true
 				break
@@ -386,15 +403,6 @@ func (i *ImageBuilder) GetCmdNotOnApk() []string {
 
 func (i *ImageBuilder) GetCmdNotSupported() []string {
 	return i.cmdNotSupported
-}
-
-func (i *ImageBuilder) LoadScriptDeps() error {
-	scriptDeps, err := i.Script.Dependencies()
-	if err != nil {
-		return err
-	}
-	i.scriptDeps = scriptDeps
-	return err
 }
 
 func (i *ImageBuilder) UpdateCmdsNotFound(cmds []string) {
