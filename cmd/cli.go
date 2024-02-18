@@ -87,7 +87,7 @@ func (m *model) analyzeShellScriptCmd() tea.Cmd {
 
 		return analyzeShellScriptMsg(
 			bodyStyle(
-				fmt.Sprintf("\n✅ %s\n├── Shell recognized: %s\n└── Found %d dependencies\n", textStyle("Analyzing shell script"), shellNameStyle(shell), totalDependencies),
+				fmt.Sprintf("\n✅ %s\n├── Shell recognized: %s\n└── Found %d root dependencies\n", textStyle("Analyzing shell script"), shellNameStyle(shell), totalDependencies),
 			),
 		)
 	}
@@ -231,7 +231,7 @@ func (m *model) getInsightsCmd() tea.Cmd {
 				}
 			}
 			if len(not_found) > 0 {
-				insights += "- We couldn't find the following dependencies. Consider installing them manually. We have generated boilerplate code for you to do so in the Dockerfile:\n"
+				insights += "- We couldn't find the following dependencies. Consider installing them manually:\n"
 				for _, cmd := range not_found {
 					insights += fmt.Sprintf("  - %s\n", commandStyle(cmd))
 				}
