@@ -3,6 +3,7 @@ package file
 import (
 	"fmt"
 	"os"
+	"path"
 )
 
 type Dockerfile struct {
@@ -110,7 +111,9 @@ func (d *Dockerfile) generateCopyInstructionSet() string {
 	if len(d.Dependencies.Lib) != 0 {
 		for _, dep := range d.Dependencies.Lib {
 			copyInstructionSet += fmt.Sprintf("## Required By: %s\n", dep.Requiredby)
-			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, dep.ToPath)
+			// remove the library soname from the to path
+			toPath := path.Dir(dep.ToPath)
+			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, toPath)
 		}
 	}
 
