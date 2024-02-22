@@ -41,10 +41,13 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 
 I got inspired by [my own article](https://bhupesh.me/publishing-my-first-ever-dockerfile-optimization-ugit/) which I wrote while writing a Dockerfile for [ugit (a shellscript based tool)](https://github.com/Bhupesh-V/ugit). I learned cool new stuff which then I realized can be materialized into this tool.
 
+## Installation
 
-## Building
+We are not ready for a stable release yet. But you can build from the source.
 
-### Pre-requisties
+## Build from source
+
+### Pre-requisites
 
 1. Docker (running)
 2. Go (>=1.21.3)
@@ -57,58 +60,31 @@ export DOCKER_HOST="unix:///Users/$USER/.docker/run/docker.sock"
 export DOCKER_API_VERSION=1.43
 ```
 
-## Shell Comptability Chart
-
-List & status of shells supported by shedock:
-
-
-|   Shell    | Comptability Status | Notes |
-| :--------: | :-----------------: | ----- |
-|    bash    |          ✅          |       |
-|    zsh     |          ⚪️          |       |
-|     sh     |          ⚪️          |       |
-|    fish    |          ⚪️          |       |
-|    oil     |          ⚪️          |       |
-|    csh     |          ⚪️          |       |
-|    tcsh    |          ⚪️          |       |
-|    ksh     |          ⚪️          |       |
-|    dash    |          ⚪️          |       |
-|    mksh    |          ⚪️          |       |
-|    oksh    |          ⚪️          |       |
-|    osh     |          ⚪️          |       |
-|    elv     |          ⚪️          |       |
-| powershell |          ⚪️          |       |
-
-
-- ✅ means that the shell is supported by shedock.
-- ⚪️ means that it's a WIP.
-- ❌ means that the shell is not supported by shedock.
-
 ## FAQs
 
 <details>
-  <summary><h3>It's <code>202N</code>, why are we still writing shell scripts?</h3></summary>
-- `They are fun to write` + `They work`, deal with it.
+  <summary>It's <code>202N</code>, why are we still writing shell scripts?</summary>
+<code>They are fun to write</code> + <code>They work</code>, deal with it.
 </details>
 <details>
-  <summary><h3><code>Docker</code> is not a package manager, why are we using it to package shell scripts?</h3></summary>
-- It's literally built to share your work across different systems. `brew` is not popular with Linux. Flatpaks, AppImages don't work on Mac, and the new Windows Terminal has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
+  <summary><code>Docker</code> is not a package manager, why are we using it to package shell scripts?</summary>
+It's literally built to share your work across different systems. brew is not popular on Linux. Flatpaks, AppImages don't work on Mac, and the new Windows Terminal has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
 </details>
 <details>
-  <summary><h3>What about other tools like <code>docker-squash</code> & <code>docker-slim</code>?</h3></summary>
+  <summary>What about other tools like <code>docker-squash</code> & <code>docker-slim</code>?</summary>
 
-- They are great, they have a big community behind them actively building and fixing stuff. Give them a try before using shedock.
-- shedock is built to educate devs, we want folks to know what exactly is required to run their script. Not hiding stuff behind some weird magic.
+- They are great, they have a big community behind them actively building and fixing stuff. Give them a try after using shedock.
+- shedock is built to educate devs, we want folks to know what exactly is required to run their script. Not hiding stuff behind some weird image magic.
 </details>
 <details>
-<summary><h3>Why not build this for all tech stacks, why only shell scripts?</h3></summary>
+<summary>Why not build this for all tech stacks, why only shell scripts?</summary>
 
-- A: because when you are building for everyone, you are building for no one.
-- B: the author is biased towards writing and sharing shell scripts 🤓.
-- C: the author doesn't have the mental energy to build & test it across 100s of tech stacks.
+1. When you are building for everyone, you are building for no one.
+2. The author is biased towards writing and sharing shell scripts 🤓.
+3. The author doesn't have the mental energy to build & test it across 100s of tech stacks.
 </details>
 <details>
-<summary><h3>I don't think you are building this right</h3></summary>
+<summary>I don't think you are building this right 🙅🏽</summary>
 
 - Great, we have something in common 🙃. I am figuring out stuff on the go. If you think something can be improved, [start a new discussion](https://github.com/shedock/shedock/discussions) and leave me some helpful tips.
 </details>
