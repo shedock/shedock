@@ -15,12 +15,12 @@ type LddParser struct {
 //
 //	/lib/ld-musl-aarch64.so.1 (0xffffa1ed5000)
 //	libc.musl-aarch64.so.1 => /lib/ld-musl-aarch64.so.1 (0xffffa1ed5000)
-func (l *LddParser) Parse() []Library {
+func (l *LddParser) Parse() []*Library {
 	output := string(l.Data)
 
 	lines := strings.Split(output, "\n")
 
-	var parsers []Library
+	var parsers []*Library
 
 	for _, line := range lines {
 		line = strings.TrimSpace(line)
@@ -35,7 +35,7 @@ func (l *LddParser) Parse() []Library {
 			soName = soNameParts[len(soNameParts)-1]
 			fullPathWithAddress := strings.TrimSpace(parts[1])
 			fullPath := strings.Split(fullPathWithAddress, " ")[0]
-			parsers = append(parsers, Library{
+			parsers = append(parsers, &Library{
 				SoName:   soName,
 				FullPath: fullPath,
 			})

@@ -50,7 +50,7 @@ func (d *Dockerfile) FirstLayer() (string, error) {
 }
 
 func (d *Dockerfile) SecondLayer() (string, error) {
-	base := fmt.Sprintf("\nFROM %s\n", SecondLayerBaseImage)
+	base := fmt.Sprintf("\nFROM %s\n\n", SecondLayerBaseImage)
 	base += labels()
 
 	copyInstructionSet := d.generateCopyInstructionSet()
@@ -96,7 +96,7 @@ func labels() string {
 	lables := `
 LABEL description="<description>"
 # Add your name & email here
-LABEL maintainer="<your name> <your email>"
+LABEL maintainer="FIRST_NAME LAST_NAME <your email>"
 `
 	return lables
 }
@@ -110,7 +110,7 @@ func (d *Dockerfile) generateCopyInstructionSet() string {
 	if len(d.Dependencies.Bin) != 0 {
 		copyInstructionSet += "## Adding Root Dependencies\n"
 		for _, dep := range d.Dependencies.Bin {
-			if dep.Requiredby != "" {
+			if len(dep.Requiredby) > 0 {
 				copyInstructionSet += fmt.Sprintf("## Required By: %s\n", dep.Requiredby)
 			}
 			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, dep.ToPath)
@@ -119,13 +119,13 @@ func (d *Dockerfile) generateCopyInstructionSet() string {
 	}
 
 	if len(d.Dependencies.Lib) != 0 {
-		copyInstructionSet += "## Adding Shared Libraries\n"
+		copyInstructionSet += "## Adding Shared Libraries\n\n"
 		for _, dep := range d.Dependencies.Lib {
-			if dep.Requiredby != "" {
+			if len(dep.Requiredby) > 0 {
 				copyInstructionSet += fmt.Sprintf("## Required By: %s\n", dep.Requiredby)
 			}
 			// remove the library soname from the to path
-			toPath := path.Dir(dep.ToPath)
+			toPath := fmt.Sprintf("%s/", path.Dir(dep.ToPath))
 			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, toPath)
 		}
 	}

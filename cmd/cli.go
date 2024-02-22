@@ -155,17 +155,15 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 
 		for _, cmd := range systemBuiltins {
 			bins = append(bins, file.Dependency{
-				FromPath:   cmd,
-				ToPath:     cmd,
-				Requiredby: "",
+				FromPath: cmd,
+				ToPath:   cmd,
 			})
 		}
 
 		for _, cmd := range externalCommands {
 			bins = append(bins, file.Dependency{
-				FromPath:   cmd,
-				ToPath:     cmd,
-				Requiredby: "",
+				FromPath: cmd,
+				ToPath:   cmd,
 			})
 		}
 
@@ -173,7 +171,7 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 			libs = append(libs, file.Dependency{
 				FromPath:   lib.FullPath,
 				ToPath:     lib.FullPath,
-				Requiredby: "",
+				Requiredby: lib.DependencyOf,
 			})
 		}
 

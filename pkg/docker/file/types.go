@@ -9,7 +9,7 @@ type Dependency struct {
 	// E.g
 	// # Required by user script: <script_name>
 	// # Required by binaries: bash, find, grep, sed, xargs etc.
-	Requiredby string
+	Requiredby []string
 }
 
 type Dependencies struct {

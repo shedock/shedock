@@ -1,6 +1,7 @@
 package ldd
 
 type Library struct {
-	SoName   string
-	FullPath string
+	SoName       string
+	FullPath     string
+	DependencyOf []string
 }

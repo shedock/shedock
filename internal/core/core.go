@@ -5,6 +5,7 @@ import (
 	"log"
 	"shedock/internal/insights"
 	"shedock/internal/instance"
+	"shedock/pkg/docker/file"
 	apkTypes "shedock/pkg/parsers/apk"
 	"shedock/pkg/parsers/ldd"
 	shellScriptTypes "shedock/pkg/parsers/shellscript"
@@ -98,6 +99,59 @@ func (i *ImageBuilder) Build() error {
 	}
 	log.Println("shared libs: ", i.sharedLibs)
 	// log.Println("script deps: ", i.scriptDeps)
+
+	var deps file.Dependencies
+	var bins []file.Dependency
+	var libs []file.Dependency
+
+	shell, _ := i.Script.GetShell()
+
+	// TODO
+	// add system builtins to the dockerfile
+	// add extra commands to the dockerfile
+	// add shared libraries to the dockerfile
+	systemBuiltins := i.GetUsedSystemBuiltins()
+	externalCommands := i.GetCmdOnApk()
+	sharedLibs := i.GetSharedLibs()
+
+	for _, cmd := range systemBuiltins {
+		bins = append(bins, file.Dependency{
+			FromPath: cmd,
+			ToPath:   cmd,
+		})
+	}
+
+	for _, cmd := range externalCommands {
+		bins = append(bins, file.Dependency{
+			FromPath: cmd,
+			ToPath:   cmd,
+		})
+	}
+
+	for _, lib := range sharedLibs {
+		libs = append(libs, file.Dependency{
+			FromPath:   lib.FullPath,
+			ToPath:     lib.FullPath,
+			Requiredby: lib.DependencyOf,
+		})
+	}
+
+	deps = file.Dependencies{
+		Bin: bins,
+		Lib: libs,
+	}
+
+	file := &file.Dockerfile{
+		DependenciesToInstall: i.GetCmdOnApk(),
+		Script:                i.Script.ScriptPath,
+		ShellPath:             shell,
+		Dependencies:          deps,
+	}
+
+	err = file.Generate()
+	if err != nil {
+		return err
+	}
 
 	return nil
 }
@@ -239,36 +293,50 @@ func (i *ImageBuilder) LoadAllSharedLibs() error {
 
 	deps = append(deps, i.usedSystemBuiltins...)
 
-	// install all packages
+	// install all packages that are available on apk
 	for _, dep := range i.cmdOnApk {
 		_, err := container.ExecCommand(fmt.Sprintf("apk add %s", dep))
 		if err != nil {
 			return err
 		}
 	}
+
 	deps = append(deps, i.cmdOnApk...)
 	shellname, err := i.Script.GetShell()
 	if err != nil {
 		return err
 	}
+
+	// the shell is also a dependency
 	deps = append(deps, shellname)
 
-	// log.Println("deps to figure out: ", deps)
 	for _, dep := range deps {
-		// Execute the info command again to get the stuff installed by the shell
+		depList := make(map[string][]string)
+
+		// Find the shared libraries required by the binary
 		output, err := container.ExecCommand(fmt.Sprintf("ldd $(which %s)", dep))
 		if err != nil {
 			return err
 		}
 		lddParser := ldd.LddParser{Data: []byte(output)}
 		libs := lddParser.Parse()
-		if err != nil {
-			return err
-		}
-		for _, lib := range libs {
-			if _, exists := uniqueLibs[lib.SoName]; !exists {
-				sl = append(sl, lib)
-				uniqueLibs[lib.SoName] = true
+
+		if len(libs) > 0 {
+			for _, lib := range libs {
+				if _, exists := uniqueLibs[lib.SoName]; !exists {
+					depList[lib.SoName] = append(depList[lib.SoName], dep)
+					lib.DependencyOf = depList[lib.SoName]
+
+					sl = append(sl, *lib)
+					uniqueLibs[lib.SoName] = true
+				} else {
+					// update DependencyOf of the shared library
+					for i, l := range sl {
+						if l.SoName == lib.SoName {
+							sl[i].DependencyOf = append(sl[i].DependencyOf, dep)
+						}
+					}
+				}
 			}
 		}
 	}
