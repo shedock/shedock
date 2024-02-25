@@ -1,9 +1,10 @@
-# shedock
-
-Generate the most _ethically_ optimized `Dockerfile` 🐳 for your shell scripts!
+<h1 align="center">shedock</h1>
+<p align="center">
+  <code><b>Generate the most ethically optimized Dockerfile 🐳 for your shell scripts!</b></code>
+</p>
 
 > [!IMPORTANT]
-> shedock is under active development and is changing everyday. Please consider `Watching` the repository for _releases_ to ge notified whenever a stable build is out!
+> shedock is under active development and is changing everyday. Please consider `Watching` the repository for _releases_ to get notified whenever a stable build is out!
 
 
 ## Features (a.k.a Goals) ✨
@@ -13,7 +14,7 @@ Generate the most _ethically_ optimized `Dockerfile` 🐳 for your shell scripts
 Shedock will generate the most ethically minimal `Dockerfile` for your shell script. This means.
 
 - Automatically detecting and adding your script & shell dependencies to the final Docker image.
-- Add only the stuff _absolutely_ required to run your script and get rid of unnecessary things whic ultimately results in a smaller image size.
+- Add only the stuff _absolutely_ required to run your script and get rid of unnecessary things which ultimately results in a smaller image size.
 
 ### ℹ️ You own it
 
@@ -39,7 +40,7 @@ Shedock will generate the most ethically minimal `Dockerfile` for your shell scr
 
 ## Inspiration
 
-I got inspired by [my own article](https://bhupesh.me/publishing-my-first-ever-dockerfile-optimization-ugit/) which I wrote while writing a Dockerfile for [ugit (a shellscript based tool)](https://github.com/Bhupesh-V/ugit). I learned cool new stuff which then I realized can be materialized into this tool.
+I got inspired by [my article](https://bhupesh.me/publishing-my-first-ever-dockerfile-optimization-ugit/) which I wrote while writing a Dockerfile for [ugit (a shellscript based tool)](https://github.com/Bhupesh-V/ugit). I learned cool new stuff which then I realized can be materialized into this tool.
 
 ## Installation
 
@@ -68,7 +69,7 @@ export DOCKER_API_VERSION=1.43
 </details>
 <details>
   <summary><code>Docker</code> is not a package manager, why are we using it to package shell scripts?</summary>
-It's literally built to share your work across different systems. brew is not popular on Linux. Flatpaks, AppImages don't work on Mac, and the new Windows Terminal has its package manager now. How much time do you want to spend just packaging stuff compared to people utilising your work?
+It's built to share your work across different systems. brew is not popular on Linux. Flatpaks and AppImages don't work on Mac, and the new Windows Terminal has its package manager now. How much time do you want to spend just packaging stuff compared to people utilizing your work?
 </details>
 <details>
   <summary>What about other tools like <code>docker-squash</code> & <code>docker-slim</code>?</summary>
