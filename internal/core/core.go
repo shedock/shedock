@@ -3,6 +3,7 @@ package core
 import (
 	"fmt"
 	"log"
+	"regexp"
 	"shedock/internal/insights"
 	"shedock/internal/instance"
 	"shedock/pkg/docker/file"
@@ -92,7 +93,7 @@ func (i *ImageBuilder) Build() error {
 	log.Println("Script deps after filter shell builtins: ", i.FilterShellBuiltins())
 	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
 	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
-	log.Println("Commands that can be installed: ", i.GetCmdOnApk())
+	// log.Println("Commands that can be installed: ", i.GetCmdOnApk())
 	err = i.LoadAllSharedLibs()
 	if err != nil {
 		return err
@@ -116,15 +117,15 @@ func (i *ImageBuilder) Build() error {
 
 	for _, cmd := range systemBuiltins {
 		bins = append(bins, file.Dependency{
-			FromPath: cmd,
-			ToPath:   cmd,
+			FromPath: cmd.Path,
+			ToPath:   cmd.Path,
 		})
 	}
 
 	for _, cmd := range externalCommands {
 		bins = append(bins, file.Dependency{
-			FromPath: cmd,
-			ToPath:   cmd,
+			FromPath: cmd.Path,
+			ToPath:   cmd.Path,
 		})
 	}
 
@@ -142,7 +143,7 @@ func (i *ImageBuilder) Build() error {
 	}
 
 	file := &file.Dockerfile{
-		DependenciesToInstall: i.GetCmdOnApk(),
+		DependenciesToInstall: externalCommands,
 		Script:                i.Script.ScriptPath,
 		ShellPath:             shell,
 		Dependencies:          deps,
@@ -445,8 +446,33 @@ func (i *ImageBuilder) GetSharedLibs() []ldd.Library {
 	return i.sharedLibs
 }
 
-func (i *ImageBuilder) GetUsedSystemBuiltins() []string {
-	return i.usedSystemBuiltins
+func (i *ImageBuilder) GetUsedSystemBuiltins() []apkTypes.Package {
+	var deps []apkTypes.Package
+	container := instance.GetDockerInstance()
+
+	r := regexp.MustCompile(`(/[^:\s]+)`)
+
+	for _, dep := range i.usedSystemBuiltins {
+		// find location of the binary
+		output, err := container.ExecCommand(fmt.Sprintf("which %s", dep))
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		// Extract the file path from the output
+		matches := r.FindStringSubmatch(output)
+		if len(matches) < 2 {
+			log.Fatalf("Could not extract file path from output: %s", output)
+		}
+		depPath := matches[1]
+
+		deps = append(deps, apkTypes.Package{
+			Name: dep,
+			Path: depPath,
+		})
+	}
+	return deps
+	// return i.usedSystemBuiltins
 }
 
 func (i *ImageBuilder) GetSystemBuiltins() []string {
@@ -461,8 +487,32 @@ func (i *ImageBuilder) GetShellBuiltins() []string {
 	return i.shellbuiltns
 }
 
-func (i *ImageBuilder) GetCmdOnApk() []string {
-	return i.cmdOnApk
+func (i *ImageBuilder) GetCmdOnApk() []apkTypes.Package {
+	var deps []apkTypes.Package
+	container := instance.GetDockerInstance()
+
+	r := regexp.MustCompile(`(/[^:\s]+)`)
+
+	for _, dep := range i.cmdOnApk {
+		// find location of the binary
+		output, err := container.ExecCommand(fmt.Sprintf("which %s", dep))
+		if err != nil {
+			log.Fatalf("%v", err)
+		}
+
+		// Extract the file path from the output
+		matches := r.FindStringSubmatch(output)
+		if len(matches) < 2 {
+			log.Fatalf("Could not extract file path from output: %s", output)
+		}
+		depPath := matches[1]
+
+		deps = append(deps, apkTypes.Package{
+			Name: dep,
+			Path: depPath,
+		})
+	}
+	return deps
 }
 
 func (i *ImageBuilder) GetCmdNotOnApk() []string {

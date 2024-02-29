@@ -12,6 +12,13 @@ type ProviderDependency struct {
 	Version string
 }
 
+type Package struct {
+	// Name of the binary package
+	Name string
+	// Path of the package once installed
+	Path string
+}
+
 type DependencyType string
 
 const (

@@ -4,12 +4,13 @@ import (
 	"fmt"
 	"os"
 	"path"
+	apkTypes "shedock/pkg/parsers/apk"
 	"strings"
 )
 
 type Dockerfile struct {
 	Dependencies          Dependencies
-	DependenciesToInstall []string
+	DependenciesToInstall []apkTypes.Package
 	// Script is the path of the script in the second layer
 	Script string
 	// ShellPath is the path of the shell in the second layer
@@ -34,10 +35,10 @@ func (d *Dockerfile) FirstLayer() (string, error) {
 
 		for depCount, dep := range d.DependenciesToInstall {
 			if depCount == len(d.DependenciesToInstall)-1 {
-				install += fmt.Sprintf("    %s\n", dep)
+				install += fmt.Sprintf("    %s\n", dep.Name)
 				break
 			} else {
-				install += fmt.Sprintf("    %s \\\n", dep)
+				install += fmt.Sprintf("    %s \\\n", dep.Name)
 			}
 		}
 	}
@@ -113,7 +114,9 @@ func (d *Dockerfile) generateCopyInstructionSet() string {
 			if len(dep.Requiredby) > 0 {
 				copyInstructionSet += fmt.Sprintf("## Required By: %s\n", dep.Requiredby)
 			}
-			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, dep.ToPath)
+			// remove the library soname from the to path
+			toPath := fmt.Sprintf("%s/", path.Dir(dep.ToPath))
+			copyInstructionSet += fmt.Sprintf("COPY --from=%s %s %s\n", FirstLayerAlias, dep.FromPath, toPath)
 		}
 		copyInstructionSet += "\n\n"
 	}

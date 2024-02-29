@@ -111,7 +111,7 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 		for _, dep := range filteredDeps {
 			var found bool
 			for _, cmd := range m.builder.GetCmdOnApk() {
-				if dep == cmd {
+				if dep == cmd.Name {
 					found = true
 					break
 				}
@@ -155,15 +155,15 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 
 		for _, cmd := range systemBuiltins {
 			bins = append(bins, file.Dependency{
-				FromPath: cmd,
-				ToPath:   cmd,
+				FromPath: cmd.Path,
+				ToPath:   cmd.Path,
 			})
 		}
 
 		for _, cmd := range externalCommands {
 			bins = append(bins, file.Dependency{
-				FromPath: cmd,
-				ToPath:   cmd,
+				FromPath: cmd.Path,
+				ToPath:   cmd.Path,
 			})
 		}
 
