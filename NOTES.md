@@ -68,29 +68,6 @@
 - Static v/s Dynamic Libraries, Linking etc.
 - Best practices for shell scripts.
 
-## Reads
-
-- Union File Systems
-  - https://martinheinz.dev/blog/44
-  - https://docs.docker.com/storage/storagedriver/overlayfs-driver/
-  - https://docs.docker.com/storage/storagedriver/aufs-driver/
-  - https://leftasexercise.com/2018/04/12/docker-internals-process-isolation-with-namespaces-and-cgroups/
-- Busybox
-  - https://www.busybox.net/
-- Packaging
-  - https://ramcq.net/2024/02/06/flathub-pros-and-cons-of-direct-uploads/
-- CLI Guidelines
-  - https://clig.dev/
-- Buildpacks
-  - https://nixpacks.com/docs
-  - https://buildpacks.io/docs/
-- Buildkit
-  - https://depot.dev/blog/buildkit-in-depth
-- Dockerfile security
-  - https://snyk.io/blog/10-docker-image-security-best-practices/
-  - https://betterstack.com/community/guides/scaling-docker/docker-security-best-practices/
-- BusyBox
-  - https://unix.stackexchange.com/questions/274273/are-busybox-commands-truly-built-in
 
 ## Checklist for use-cases while Dockerizing a shell script
 
@@ -120,16 +97,3 @@
 - Unncessary usage of basename:
   - `$(basename "${BASH_SOURCE[0]}")` -> `<script_name>`
   - Reduce size by hardcoding the script name.
-
-## Package Maintainers
-
-- https://debian-handbook.info/browse/stable/sect.becoming-package-maintainer.html
-- https://www.reddit.com/r/linux/comments/kmat5j/what_exactly_is_expected_of_a_package_maintainer/
-- https://wiki.archlinux.org/title/Package_Maintainers
-- https://unixsheikh.com/articles/the-heavy-responsibility-of-the-package-maintainer.html
-- https://github.com/jubalh/awesome-package-maintainer
-
-## Container Tooling
-
-- https://buildah.io/
-- https://github.com/abiosoft/colima
