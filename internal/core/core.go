@@ -63,43 +63,39 @@ func (i *ImageBuilder) Build() error {
 	// remove not-supported commands from script deps
 	// remove shell-builtins and system-builtins from script deps and find what we can get from package manager
 	filteredDeps = i.FilterCmdsToInstall()
+	log.Println("Filtered dependencies: ", filteredDeps)
 	err = i.DependenciesAvailableOnPackageHost(filteredDeps)
 	if err != nil {
 		return err
 	}
+
+	log.Println("Shell builtins: ", i.GetShellBuiltins())
+	log.Println("Script deps after filter system builtins: ", i.GetUsedSystemBuiltins())
+	log.Println("Script deps after filter shell builtins: ", i.FilterShellBuiltins())
+	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
+	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
+
+	err = i.LoadAllSharedLibs()
+	if err != nil {
+		return err
+	}
+	cmdOnApk := i.GetCmdOnApk()
+	log.Println("Commands available on apk: ", cmdOnApk)
 	// commands not available on apk come under not found
+	var notFound []string
 	for _, dep := range filteredDeps {
 		var found bool
-		for _, cmd := range i.cmdOnApk {
-			if dep == cmd {
+		for _, cmd := range cmdOnApk {
+			if dep == cmd.Name {
 				found = true
 				break
 			}
 		}
 		if !found {
-			i.cmdNotOnApk = append(i.cmdNotOnApk, dep)
+			notFound = append(notFound, dep)
 		}
 	}
-
-	// log.Println("Script dependencies: ", i.GetScriptDeps())
-	// for _, dep := range i.GetScriptDeps() {
-	// 	fmt.Println("dep: ", dep.Name, "args: ", dep.Args)
-	// }
-	// os.Exit(0)
-	log.Println("Shell builtins: ", i.GetShellBuiltins())
-	// log.Println("System builtins: ", i.GetSystemBuiltins())
-	// os.Exit(0)
-	log.Println("Script deps after filter system builtins: ", i.GetUsedSystemBuiltins())
-	log.Println("Script deps after filter shell builtins: ", i.FilterShellBuiltins())
-	log.Println("Commands not found on apk: ", i.GetCmdNotOnApk())
-	log.Println("Commands not supported in containerized environment: ", i.GetCmdNotSupported())
-	// log.Println("Commands that can be installed: ", i.GetCmdOnApk())
-	err = i.LoadAllSharedLibs()
-	if err != nil {
-		return err
-	}
-	log.Println("shared libs: ", i.sharedLibs)
-	// log.Println("script deps: ", i.scriptDeps)
+	i.UpdateCmdsNotFound(notFound)
 
 	var deps file.Dependencies
 	var bins []file.Dependency
@@ -107,10 +103,6 @@ func (i *ImageBuilder) Build() error {
 
 	shell, _ := i.Script.GetShell()
 
-	// TODO
-	// add system builtins to the dockerfile
-	// add extra commands to the dockerfile
-	// add shared libraries to the dockerfile
 	systemBuiltins := i.GetUsedSystemBuiltins()
 	externalCommands := i.GetCmdOnApk()
 	sharedLibs := i.GetSharedLibs()
@@ -149,7 +141,7 @@ func (i *ImageBuilder) Build() error {
 		Dependencies:          deps,
 	}
 
-	err = file.Generate()
+	_, err = file.Generate()
 	if err != nil {
 		return err
 	}
@@ -462,7 +454,7 @@ func (i *ImageBuilder) GetUsedSystemBuiltins() []apkTypes.Package {
 		// Extract the file path from the output
 		matches := r.FindStringSubmatch(output)
 		if len(matches) < 2 {
-			log.Fatalf("Could not extract file path from output: %s", output)
+			log.Fatalf("GetUsedSystemBuiltins: Could not extract file path from output: %s", output)
 		}
 		depPath := matches[1]
 
@@ -502,15 +494,15 @@ func (i *ImageBuilder) GetCmdOnApk() []apkTypes.Package {
 
 		// Extract the file path from the output
 		matches := r.FindStringSubmatch(output)
-		if len(matches) < 2 {
-			log.Fatalf("Could not extract file path from output: %s", output)
-		}
-		depPath := matches[1]
 
-		deps = append(deps, apkTypes.Package{
-			Name: dep,
-			Path: depPath,
-		})
+		if len(matches) >= 1 {
+			depPath := matches[0]
+
+			deps = append(deps, apkTypes.Package{
+				Name: dep,
+				Path: depPath,
+			})
+		}
 	}
 	return deps
 }

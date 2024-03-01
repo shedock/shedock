@@ -152,18 +152,24 @@ func writeToFile(path, content string) error {
 	return nil
 }
 
-func (d *Dockerfile) Generate() error {
+func (d *Dockerfile) Generate() (string, error) {
 	instructions, err := d.getInstructions()
 	if err != nil {
-		return err
+		return "", err
 	}
 
 	err = writeToFile("Dockerfile", instructions)
 	if err != nil {
-		return err
+		return "", err
 	}
 
-	return nil
+	// return the path of the generated Dockerfile with full path
+	cwd, err := os.Getwd()
+	if err != nil {
+		return "", err
+	}
+
+	return fmt.Sprintf("%s/Dockerfile", cwd), nil
 }
 
 func getPromotionalComments() string {

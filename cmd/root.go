@@ -9,10 +9,10 @@ import (
 
 var rootCmd = &cobra.Command{
 	Use:   "shedock",
-	Short: "shedock is a CLI application",
-	Long:  `shedock is a CLI application. It accepts a filepath as an argument.`,
+	Short: "Dockerize your shell scripts with the most accurate & ethical image size!",
+	Long:  `Dockerize your shell scripts with the most accurate & ethical image size!`,
 	Args:  cobra.ExactArgs(1),
-	Run:   Driver,
+	Run:   DriverCli,
 }
 
 var versionCmd = &cobra.Command{

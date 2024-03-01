@@ -106,11 +106,17 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 		if err != nil {
 			return err
 		}
+		err = m.builder.LoadAllSharedLibs()
+		if err != nil {
+			return err
+		}
+
+		cmdOnApk := m.builder.GetCmdOnApk()
 		// commands not available on apk come under not found
 		var notFound []string
 		for _, dep := range filteredDeps {
 			var found bool
-			for _, cmd := range m.builder.GetCmdOnApk() {
+			for _, cmd := range cmdOnApk {
 				if dep == cmd.Name {
 					found = true
 					break
@@ -122,10 +128,6 @@ func (m *model) getTransitiveDependenciesCmd() tea.Cmd {
 		}
 		m.builder.UpdateCmdsNotFound(notFound)
 
-		err = m.builder.LoadAllSharedLibs()
-		if err != nil {
-			return err
-		}
 		libs := m.builder.GetSharedLibs()
 
 		transitiveDependencies := len(libs)
@@ -144,11 +146,6 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 		var libs []file.Dependency
 
 		shell, _ := m.builder.Script.GetShell()
-
-		// TODO
-		// add system builtins to the dockerfile
-		// add extra commands to the dockerfile
-		// add shared libraries to the dockerfile
 		systemBuiltins := m.builder.GetUsedSystemBuiltins()
 		externalCommands := m.builder.GetCmdOnApk()
 		sharedLibs := m.builder.GetSharedLibs()
@@ -181,21 +178,20 @@ func (m *model) generateDockerfileCmd() tea.Cmd {
 		}
 
 		file := &file.Dockerfile{
-			DependenciesToInstall: m.builder.GetCmdOnApk(),
+			DependenciesToInstall: externalCommands,
 			Script:                m.builder.Script.ScriptPath,
 			ShellPath:             shell,
 			Dependencies:          deps,
 		}
 
-		err := file.Generate()
+		dockerFilePath, err := file.Generate()
 		if err != nil {
 			return err
 		}
 
-		dockerfilePath := ""
 		return generateDockerfileMsg(
 			bodyStyle(
-				fmt.Sprintf("\n✅ %s\n└── Dockerfile generated at %s\n", textStyle("Generating Dockerfile"), dockerfilePath),
+				fmt.Sprintf("\n✅ %s\n└── Dockerfile generated at %s\n", textStyle("Generating Dockerfile"), dockerFilePath),
 			),
 		)
 	}
@@ -249,7 +245,7 @@ func (m *model) Init() tea.Cmd {
 		m.analyzeShellScriptCmd(),
 		m.getTransitiveDependenciesCmd(),
 		m.generateDockerfileCmd(),
-		m.buildImageCmd(),
+		// m.buildImageCmd(),
 		m.getInsightsCmd(),
 	)
 }
@@ -273,16 +269,16 @@ func (m *model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case generateDockerfileMsg:
 		m.commandOutput += string(msg)
 		m.step++
-	case buildImageMsg:
-		m.commandOutput += string(msg)
-		m.step++
+	// case buildImageMsg:
+	// 	m.commandOutput += string(msg)
+	// 	m.step++
 	case insightsMsg:
 		m.commandOutput += string(msg)
 		m.step++
 	default:
 		return m, nil
 	}
-	if m.step > 4 {
+	if m.step > 3 {
 		return m, tea.Quit
 	}
 	return m, nil
@@ -304,20 +300,10 @@ func (m *model) View() string {
 		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Getting transitive dependencies"))
 	case 2:
 		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Generating Dockerfile"))
-	case 3:
-		s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Building image"))
+		// case 3:
+		// 	s += fmt.Sprintf("\n\n%s %s", m.spinner.View(), textStyle("Building image"))
 	}
 	return s
-}
-
-func main() {
-	m := &model{}
-	m.initSpinner()
-
-	if _, err := tea.NewProgram(m).Run(); err != nil {
-		fmt.Println("could not run program:", err)
-		os.Exit(1)
-	}
 }
 
 func DriverCli(cmd *cobra.Command, args []string) {
@@ -341,11 +327,6 @@ func DriverCli(cmd *cobra.Command, args []string) {
 		&script,
 		shell,
 	)
-
-	// err = imageBuilder.Build()
-	// if err != nil {
-	// 	log.Fatalf("Failed to build image: %v", err)
-	// }
 
 	m := &model{
 		builder: imageBuilder,
