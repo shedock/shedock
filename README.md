@@ -54,11 +54,23 @@ We are not ready for a stable release yet. But you can build from the source.
 2. Go (>=1.21.3)
 3. The Internet
 
-To run on Mac, you need to set the following environment variables:
+Export these 2 env variables:
+
+1. `DOCKER_HOST`
+2. `DOCKER_API_VERSION`
+
+#### Mac
 
 ```bash
 export DOCKER_HOST="unix:///Users/$USER/.docker/run/docker.sock"
-export DOCKER_API_VERSION=1.43
+export DOCKER_API_VERSION=$(docker version --format '{{.Client.APIVersion}}')
+```
+
+#### Linux
+
+```bash
+export DOCKER_HOST="unix:///var/run/docker.sock"
+export DOCKER_API_VERSION=$(docker version --format '{{.Client.APIVersion}}')
 ```
 
 ## FAQs
