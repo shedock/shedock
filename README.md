@@ -73,6 +73,13 @@ export DOCKER_HOST="unix:///var/run/docker.sock"
 export DOCKER_API_VERSION=$(docker version --format '{{.Client.APIVersion}}')
 ```
 
+### Build
+
+```bash
+go build -o shedock main.go
+./shedock /path/to/your/script.sh
+```
+
 ## FAQs
 
 <details>
