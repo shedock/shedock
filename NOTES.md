@@ -6,15 +6,15 @@
 2. ~~Find the base shell type (bash, zsh, sh, etc.)~~.
 3. ~~Find builtins for the base shell type~~.
 4. ~~Filter out the shell builtins from the commands~~.
-   1. These builtins will be installed with the base shell type.
-   2. The remaining commands will be searched, and or installed with the Alpine package manager.
-5. Start an alpine container
-   1. Update package manager cache `apk update`.
-   2. Find the dependencies for base shell type (shared objects and location to builtins) `apk info -a <shell>`.
-   3. Install the base shell type `apk add <shell>`.
-   4. Search the remaining commands in the Alpine package manager.
-      1. If found, install the package.
-      2. Find the dependencies for the package.
+   1. ~~These builtins will be installed with the base shell type.~~
+   2. ~~The remaining commands will be searched, and or installed with the Alpine package manager.~~
+5. ~~Start an alpine container~~
+   1. ~~Update package manager cache `apk update`.~~
+   2. ~~Find the dependencies for base shell type (shared objects and location to builtins) `apk info -a <shell>`.~~
+   3. ~~Install the base shell type `apk add <shell>`.~~
+   4. ~~Search the remaining commands in the Alpine package manager.~~
+      1. ~~If found, install the package.~~
+      2. ~~Find the dependencies for the package.~~
 6. Label commands not found on apk as "user defined".
 7. Generate the Dockerfile.
 
@@ -61,12 +61,12 @@
 - Find more on https://github.com/search?q=language%3AShell+fork%3Afalse+stars%3A%3E1000&type=repositories&s=updated&o=desc
 
 
-## Blog Ideas
+<!-- ## Blog Ideas
 
 - The need for dockerizing your shell scripts.
 - The awesomeness of Alpine images.
 - Static v/s Dynamic Libraries, Linking etc.
-- Best practices for shell scripts.
+- Best practices for shell scripts. -->
 
 
 ## Checklist for use-cases while Dockerizing a shell script
