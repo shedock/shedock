@@ -44,7 +44,7 @@ I got inspired by [my article](https://bhupesh.me/publishing-my-first-ever-docke
 
 ## Installation
 
-We are not ready for a stable release yet. But you can build from the source.
+We are not ready for a stable release yet. But you can build from the source. THERE IS NO `EXE` FILE.
 
 ## Build from source
 
